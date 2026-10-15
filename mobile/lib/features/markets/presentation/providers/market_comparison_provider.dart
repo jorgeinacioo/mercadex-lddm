@@ -6,7 +6,7 @@ import 'package:mercadex/features/shopping_list/presentation/providers/shopping_
 final marketComparisonProvider = FutureProvider<List<MarketComparison>>((
   ref,
 ) async {
-  final items = ref.watch(shoppingListProvider);
+  final items = await ref.watch(shoppingListProvider.future);
   if (items.isEmpty) return [];
 
   final products = await Future.wait(

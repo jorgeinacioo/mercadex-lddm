@@ -19,11 +19,36 @@ class ProductPage extends ConsumerStatefulWidget {
 
 class _ProductPageState extends ConsumerState<ProductPage> {
   late final Future<ProductDeals> _product;
+  var _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     _product = const ProductsRepository().getProductDeals(widget.productId);
+  }
+
+  Future<void> _addToList(ProductDeals product) async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      await ref
+          .read(shoppingListProvider.notifier)
+          .add(
+            productId: product.id,
+            name: product.name,
+            packaging: product.packaging,
+          );
+      if (!mounted) return;
+      showAppNotification(context, '${product.name} adicionado à lista.');
+    } catch (_) {
+      if (!mounted) return;
+      showAppNotification(
+        context,
+        'Não foi possível salvar o produto na lista.',
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -70,19 +95,7 @@ class _ProductPageState extends ConsumerState<ProductPage> {
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
-                onPressed: () {
-                  ref
-                      .read(shoppingListProvider.notifier)
-                      .add(
-                        productId: product.id,
-                        name: product.name,
-                        packaging: product.packaging,
-                      );
-                  showAppNotification(
-                    context,
-                    '${product.name} adicionado à lista.',
-                  );
-                },
+                onPressed: _isSaving ? null : () => _addToList(product),
                 icon: const Icon(Icons.add_shopping_cart_outlined),
                 label: const Text('Adicionar à lista de compras'),
               ),
