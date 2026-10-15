@@ -165,7 +165,13 @@ class _ShoppingListCard extends StatelessWidget {
                 onPressed: pending ? null : onDecrease,
                 icon: const Icon(Icons.remove_circle_outline),
               ),
-              Text('${item.quantity}'),
+              Text(
+                '${item.quantity}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               IconButton(
                 tooltip: 'Aumentar',
                 onPressed: pending ? null : onIncrease,

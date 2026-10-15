@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:mercadex/core/theme/app_colors.dart';
 
 class AdBanner extends StatefulWidget {
   const AdBanner({super.key});
@@ -48,8 +49,9 @@ class _AdBannerState extends State<AdBanner> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
         ),
         child: Stack(
           alignment: Alignment.bottomCenter,
@@ -59,8 +61,19 @@ class _AdBannerState extends State<AdBanner> {
               onPageChanged: (page) => setState(() => currentPage = page),
               itemBuilder: (context, index) {
                 return Container(
-                  decoration: BoxDecoration(color: Colors.grey.shade300),
-                  child: Center(child: Text('Anúncio ${index % _adCount + 1}')),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Anúncio ${index % _adCount + 1}',
+                      style: const TextStyle(
+                        color: AppColors.deepGreen,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
@@ -75,9 +88,7 @@ class _AdBannerState extends State<AdBanner> {
                     height: 8,
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.white70,
+                      color: isActive ? AppColors.primary : AppColors.border,
                       borderRadius: BorderRadius.circular(99),
                     ),
                   );

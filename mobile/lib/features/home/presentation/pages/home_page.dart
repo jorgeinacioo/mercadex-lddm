@@ -18,9 +18,9 @@ class HomePage extends ConsumerWidget {
     final hotTodayProducts = ref.watch(hotTodayProductsProvider);
 
     return Scaffold(
-      appBar: const AppTopBar(title: 'Mercadex'),
+      appBar: const AppTopBar(title: 'Mercadex', showBrand: true),
       body: ListView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
         children: [
           AppSearchField(
             onSubmitted: (query) {
@@ -34,24 +34,16 @@ class HomePage extends ConsumerWidget {
               );
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: () => context.push('/scan'),
-              icon: const Icon(Icons.camera_alt_outlined),
+              icon: const Icon(Icons.qr_code_scanner),
               label: const Text('Escanear produto'),
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(36),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
           const AdBanner(),
           const SizedBox(height: 24),
           const TopMarkets(),

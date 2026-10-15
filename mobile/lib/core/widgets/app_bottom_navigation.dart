@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
 
 class AppBottomNavigation extends ConsumerWidget {
@@ -23,33 +24,38 @@ class AppBottomNavigation extends ConsumerWidget {
 
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex == -1 ? 0 : selectedIndex,
-        onDestinationSelected: (index) {
-          final branch = visibleBranches[index];
-          navigationShell.goBranch(
-            branch,
-            initialLocation: branch == navigationShell.currentIndex,
-          );
-        },
-        destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Início',
-          ),
-          if (loggedIn)
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: NavigationBar(
+          selectedIndex: selectedIndex == -1 ? 0 : selectedIndex,
+          onDestinationSelected: (index) {
+            final branch = visibleBranches[index];
+            navigationShell.goBranch(
+              branch,
+              initialLocation: branch == navigationShell.currentIndex,
+            );
+          },
+          destinations: [
             const NavigationDestination(
-              icon: Icon(Icons.shopping_bag_outlined),
-              selectedIcon: Icon(Icons.shopping_bag),
-              label: 'Lista',
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Início',
             ),
-          const NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
+            if (loggedIn)
+              const NavigationDestination(
+                icon: Icon(Icons.shopping_bag_outlined),
+                selectedIcon: Icon(Icons.shopping_bag),
+                label: 'Lista',
+              ),
+            const NavigationDestination(
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person),
+              label: 'Perfil',
+            ),
+          ],
+        ),
       ),
     );
   }
