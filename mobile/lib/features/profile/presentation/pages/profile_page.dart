@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
 import 'package:mercadex/core/widgets/app_top_bar.dart';
+import 'package:mercadex/core/widgets/mercadex_logo.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -14,8 +15,10 @@ class ProfilePage extends ConsumerWidget {
     return Scaffold(
       appBar: const AppTopBar(title: 'Perfil'),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
         children: [
+          const MercadexLogo(markSize: 36),
+          const SizedBox(height: 20),
           if (session == null)
             Card(
               child: ListTile(
@@ -69,11 +72,19 @@ class AboutSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Center(
+              child: MercadexLogo(
+                markSize: 56,
+                showSlogan: true,
+                centered: true,
+              ),
+            ),
+            const SizedBox(height: 24),
             Text(
               'Sobre o Mercadex',
               style: Theme.of(context).textTheme.headlineSmall,

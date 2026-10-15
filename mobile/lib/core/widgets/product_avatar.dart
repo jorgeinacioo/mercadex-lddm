@@ -12,10 +12,15 @@ class ProductAvatar extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.seed.withValues(alpha: 0.12),
+        color: AppColors.primary.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
       ),
-      child: const Icon(Icons.shopping_basket_outlined, color: AppColors.seed),
+      child: Icon(
+        Icons.shopping_bag_outlined,
+        color: AppColors.primary,
+        size: size * 0.46,
+      ),
     );
   }
 }

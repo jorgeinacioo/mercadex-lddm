@@ -111,13 +111,13 @@ class ComparisonPage extends ConsumerWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.18),
+                              color: AppColors.amber,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Text(
                               'Recomendado',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.deepGreen,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 12,
                               ),
@@ -138,7 +138,7 @@ class ComparisonPage extends ConsumerWidget {
                           Text(
                             'Economia estimada: ${_brl(savings)}',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppColors.amber,
                               fontWeight: FontWeight.w700,
                             ),
                           ),

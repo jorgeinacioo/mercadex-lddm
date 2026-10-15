@@ -5,6 +5,7 @@ import 'package:mercadex/features/auth/data/auth_repository.dart';
 import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
 import 'package:mercadex/core/widgets/app_top_bar.dart';
 import 'package:mercadex/core/widgets/app_notification.dart';
+import 'package:mercadex/core/widgets/mercadex_logo.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -68,8 +69,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Scaffold(
       appBar: const AppTopBar(title: 'Entrar'),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
         children: [
+          const SizedBox(height: 12),
+          const Center(
+            child: MercadexLogo(markSize: 72, showSlogan: true, centered: true),
+          ),
+          const SizedBox(height: 36),
           Text(
             'Acesse sua conta',
             style: Theme.of(context).textTheme.headlineSmall,
