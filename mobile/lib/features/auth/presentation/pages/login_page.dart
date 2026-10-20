@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mercadex/features/auth/data/auth_repository.dart';
 import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
-import 'package:mercadex/core/widgets/app_top_bar.dart';
+import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/core/widgets/app_notification.dart';
 import 'package:mercadex/core/widgets/mercadex_logo.dart';
 
@@ -67,28 +67,38 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppTopBar(title: 'Entrar'),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(Icons.arrow_back),
+        ),
+      ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
         children: [
-          const SizedBox(height: 12),
-          const Center(
-            child: MercadexLogo(markSize: 72, showSlogan: true, centered: true),
-          ),
-          const SizedBox(height: 36),
+          const Center(child: MercadexLogo(markSize: 64, centered: true)),
+          const SizedBox(height: 28),
           Text(
-            'Acesse sua conta',
+            'Bem-vindo de volta',
+            textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Entre para compartilhar e confirmar ofertas de alimentos.',
+          const SizedBox(height: 6),
+          Text(
+            'Entre para continuar',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
           TextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'E-mail'),
+            decoration: const InputDecoration(
+              labelText: 'E-mail',
+              hintText: 'seu@email.com',
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -100,6 +110,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           FilledButton(
             onPressed: _isSubmitting ? null : _login,
             child: Text(_isSubmitting ? 'Entrando...' : 'Entrar'),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                showAppNotification(
+                  context,
+                  'A recuperação de senha ainda não está disponível.',
+                );
+              },
+              child: const Text('Esqueceu a senha?'),
+            ),
           ),
         ],
       ),

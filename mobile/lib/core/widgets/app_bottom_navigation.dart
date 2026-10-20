@@ -45,8 +45,8 @@ class AppBottomNavigation extends ConsumerWidget {
             ),
             if (loggedIn)
               const NavigationDestination(
-                icon: Icon(Icons.shopping_bag_outlined),
-                selectedIcon: Icon(Icons.shopping_bag),
+                icon: Icon(Icons.list_alt_outlined),
+                selectedIcon: Icon(Icons.list_alt),
                 label: 'Lista',
               ),
             const NavigationDestination(

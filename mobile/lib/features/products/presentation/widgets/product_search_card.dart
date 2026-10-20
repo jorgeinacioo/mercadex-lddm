@@ -34,7 +34,7 @@ class ProductSearchCard extends StatelessWidget {
                       name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.deepGreen,
+                        color: AppColors.ink,
                       ),
                     ),
                     const SizedBox(height: 4),

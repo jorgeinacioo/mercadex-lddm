@@ -13,11 +13,10 @@ class ProductAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(size * 0.32),
       ),
       child: Icon(
-        Icons.shopping_bag_outlined,
+        Icons.shopping_bag,
         color: AppColors.primary,
         size: size * 0.46,
       ),

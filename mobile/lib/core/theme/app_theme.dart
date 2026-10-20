@@ -4,7 +4,7 @@ import 'package:mercadex/core/theme/app_colors.dart';
 class AppTheme {
   const AppTheme._();
 
-  static const _radius = 16.0;
+  static const _radius = 20.0;
 
   static ThemeData get light {
     final colorScheme =
@@ -14,10 +14,12 @@ class AppTheme {
         ).copyWith(
           primary: AppColors.primary,
           onPrimary: AppColors.surface,
-          primaryContainer: const Color(0xFFDCEFE4),
+          primaryContainer: const Color(0xFFDCFCE7),
           onPrimaryContainer: AppColors.deepGreen,
           secondary: AppColors.amber,
           onSecondary: AppColors.deepGreen,
+          tertiary: AppColors.orange,
+          onTertiary: AppColors.ink,
           surface: AppColors.surface,
           onSurface: AppColors.ink,
           onSurfaceVariant: AppColors.textSecondary,
@@ -25,7 +27,11 @@ class AppTheme {
         );
 
     final textTheme = Typography.material2021().black
-        .apply(bodyColor: AppColors.ink, displayColor: AppColors.ink)
+        .apply(
+          fontFamily: 'Inter',
+          bodyColor: AppColors.ink,
+          displayColor: AppColors.ink,
+        )
         .copyWith(
           headlineSmall: const TextStyle(
             color: AppColors.ink,
@@ -86,6 +92,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
+      fontFamily: 'Inter',
       textTheme: textTheme,
       scaffoldBackgroundColor: AppColors.background,
       splashColor: AppColors.primary.withValues(alpha: 0.08),
@@ -98,7 +105,7 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: textTheme.titleLarge,
-        iconTheme: const IconThemeData(color: AppColors.deepGreen),
+        iconTheme: const IconThemeData(color: AppColors.primary),
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
