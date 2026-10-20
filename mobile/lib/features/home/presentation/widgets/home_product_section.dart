@@ -52,7 +52,7 @@ class HomeProductSection extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.titleSmall
                                     ?.copyWith(
-                                      color: AppColors.deepGreen,
+                                      color: AppColors.ink,
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),

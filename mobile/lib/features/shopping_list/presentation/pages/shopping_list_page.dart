@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mercadex/features/shopping_list/domain/shopping_list_item.dart';
+import 'package:mercadex/features/shopping_list/domain/shopping_list_sort_order.dart';
 import 'package:mercadex/features/shopping_list/presentation/providers/shopping_list_provider.dart';
+import 'package:mercadex/features/shopping_list/presentation/providers/shopping_list_sort_order_provider.dart';
 import 'package:mercadex/core/widgets/app_top_bar.dart';
 import 'package:mercadex/core/widgets/app_notification.dart';
 import 'package:mercadex/core/widgets/product_avatar.dart';
@@ -17,6 +19,7 @@ class ShoppingListPage extends ConsumerStatefulWidget {
 
 class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
   final _pending = <String>{};
+  var _savingSort = false;
 
   Future<void> _mutate(String productId, Future<void> Function() action) async {
     if (_pending.contains(productId)) return;
@@ -34,8 +37,33 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
     }
   }
 
+  Future<void> _changeSort(ShoppingListSortOrder order) async {
+    final current = ref.read(shoppingListSortOrderProvider).asData?.value;
+    if (_savingSort || current == order) return;
+    setState(() => _savingSort = true);
+    try {
+      await ref.read(shoppingListSortOrderProvider.notifier).select(order);
+    } catch (_) {
+      if (!mounted) return;
+      showAppNotification(
+        context,
+        'Não foi possível salvar a ordenação da lista.',
+      );
+    } finally {
+      if (mounted) setState(() => _savingSort = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(shoppingListSortOrderProvider, (previous, next) {
+      if (!next.hasError || previous?.hasError == true || !mounted) return;
+      showAppNotification(
+        context,
+        'Não foi possível carregar a ordenação. A lista segue a ordem de adição.',
+      );
+    });
+
     final itemsAsync = ref.watch(shoppingListProvider);
     final items = itemsAsync.asData?.value;
 
@@ -62,43 +90,67 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
             ),
           ),
         ),
-        data: (loaded) => loaded.isEmpty
-            ? const Center(child: Text('Sua lista de compras está vazia.'))
-            : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: loaded.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final item = loaded[index];
-                  final pending = _pending.contains(item.productId);
-                  return _ShoppingListCard(
-                    item: item,
-                    pending: pending,
-                    onDecrease: () => _mutate(
-                      item.productId,
-                      () => ref
-                          .read(shoppingListProvider.notifier)
-                          .decrement(item.productId),
-                    ),
-                    onIncrease: () => _mutate(
-                      item.productId,
-                      () => ref
-                          .read(shoppingListProvider.notifier)
-                          .add(
-                            productId: item.productId,
-                            name: item.name,
-                            packaging: item.packaging,
-                          ),
-                    ),
-                    onRemove: () => _mutate(
-                      item.productId,
-                      () => ref
-                          .read(shoppingListProvider.notifier)
-                          .remove(item.productId),
-                    ),
-                  );
-                },
+        data: (loaded) {
+          final sortAsync = ref.watch(shoppingListSortOrderProvider);
+          if (sortAsync.isLoading && !sortAsync.hasValue) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final order = sortAsync.value ?? ShoppingListSortOrder.createdAt;
+          final visible = sortedShoppingList(loaded, order);
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: _SortOrderControl(
+                  order: order,
+                  enabled: !_savingSort,
+                  onChanged: _changeSort,
+                ),
               ),
+              Expanded(
+                child: visible.isEmpty
+                    ? const Center(
+                        child: Text('Sua lista de compras está vazia.'),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: visible.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final item = visible[index];
+                          final pending = _pending.contains(item.productId);
+                          return _ShoppingListCard(
+                            item: item,
+                            pending: pending,
+                            onDecrease: () => _mutate(
+                              item.productId,
+                              () => ref
+                                  .read(shoppingListProvider.notifier)
+                                  .decrement(item.productId),
+                            ),
+                            onIncrease: () => _mutate(
+                              item.productId,
+                              () => ref
+                                  .read(shoppingListProvider.notifier)
+                                  .add(
+                                    productId: item.productId,
+                                    name: item.name,
+                                    packaging: item.packaging,
+                                  ),
+                            ),
+                            onRemove: () => _mutate(
+                              item.productId,
+                              () => ref
+                                  .read(shoppingListProvider.notifier)
+                                  .remove(item.productId),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -186,6 +238,58 @@ class _ShoppingListCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SortOrderControl extends StatelessWidget {
+  const _SortOrderControl({
+    required this.order,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final ShoppingListSortOrder order;
+  final bool enabled;
+  final ValueChanged<ShoppingListSortOrder> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Ordenar por', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: SegmentedButton<ShoppingListSortOrder>(
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              backgroundColor: AppColors.surface,
+              foregroundColor: AppColors.deepGreen,
+              selectedBackgroundColor: AppColors.primary,
+              selectedForegroundColor: AppColors.surface,
+              side: const BorderSide(color: AppColors.border),
+            ),
+            segments: const [
+              ButtonSegment(
+                value: ShoppingListSortOrder.createdAt,
+                label: Text('Adição'),
+                tooltip: 'Ordem de adição',
+              ),
+              ButtonSegment(
+                value: ShoppingListSortOrder.nameAsc,
+                label: Text('Nome A–Z'),
+                tooltip: 'Nome do produto',
+              ),
+            ],
+            selected: {order},
+            onSelectionChanged: enabled
+                ? (selection) => onChanged(selection.first)
+                : null,
+          ),
+        ),
+      ],
     );
   }
 }
