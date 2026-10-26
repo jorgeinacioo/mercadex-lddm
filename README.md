@@ -16,6 +16,7 @@ Ajudar quem compra a encontrar o mesmo produto em mercados próximos, comparar a
 - Comparação de cesta
 - Login
 - Login salvo no armazenamento seguro do dispositivo até o token expirar (1 dia); senha não é salva
+- Ícone Mercadex e tela de abertura nativa no Android e iOS
 - Suporte a mocks e à API HTTP
 
 ## Stack
@@ -49,6 +50,8 @@ docker-compose.yml
 ```
 
 O mobile segue organização por feature em `mobile/lib/features/`. Componentes compartilhados ficam em `mobile/lib/core/`.
+
+Os arquivos fonte do ícone e da tela de abertura ficam em `mobile/assets/branding/`. Após alterar as imagens PNG, regenere os recursos nativos com `flutter pub run flutter_launcher_icons` e `flutter pub run flutter_native_splash:create` dentro de `mobile/`.
 
 ## Executando o Mobile com Mocks
 
