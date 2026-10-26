@@ -29,6 +29,8 @@ class SecureAuthSessionStorage implements AuthSessionStorage {
       if (username.isEmpty ||
           token.isEmpty ||
           data['mock'] != AppConfig.useMockData ||
+          (AppConfig.useMockData &&
+              (username != 'admin' || token != 'mock-access-token')) ||
           (!AppConfig.useMockData && !_isValidToken(token))) {
         await clear();
         return null;

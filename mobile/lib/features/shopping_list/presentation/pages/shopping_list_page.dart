@@ -81,14 +81,17 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
       ),
       body: itemsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: TextButton(
-            onPressed: () => ref.invalidate(shoppingListProvider),
-            child: const Text(
-              'Não foi possível carregar a lista. Tentar novamente',
+        error: (error, stackTrace) {
+          debugPrint('Shopping list load failed: $error\n$stackTrace');
+          return Center(
+            child: TextButton(
+              onPressed: () => ref.invalidate(shoppingListProvider),
+              child: const Text(
+                'Não foi possível carregar a lista. Tentar novamente',
+              ),
             ),
-          ),
-        ),
+          );
+        },
         data: (loaded) {
           final sortAsync = ref.watch(shoppingListSortOrderProvider);
           if (sortAsync.isLoading && !sortAsync.hasValue) {

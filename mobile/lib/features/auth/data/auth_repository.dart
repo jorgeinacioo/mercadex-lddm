@@ -8,6 +8,9 @@ class AuthRepository {
 
   Future<String> login({required String username, required String password}) {
     if (AppConfig.useMockData) {
+      if (username != 'admin' || password != 'admin') {
+        return Future.error(const FormatException('Invalid credentials'));
+      }
       return Future.value('mock-access-token');
     }
 

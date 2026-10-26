@@ -11,11 +11,17 @@ import 'package:mercadex/features/auth/presentation/providers/auth_session_provi
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   const storage = SecureAuthSessionStorage();
-  final session = await storage.read().catchError((Object _) => null);
+  final session = await storage.read().catchError((Object error) {
+    debugPrint('Auth session load failed: $error');
+    return null;
+  });
   final themePreferences = SharedPreferencesThemePreferences();
-  final darkMode = await themePreferences.readDarkMode().catchError(
-    (Object _) => false,
-  );
+  final darkMode = await themePreferences.readDarkMode().catchError((
+    Object error,
+  ) {
+    debugPrint('Theme load failed: $error');
+    return false;
+  });
   runApp(
     ProviderScope(
       overrides: [

@@ -22,7 +22,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     setState(() => _savingTheme = true);
     try {
       await ref.read(themeModeProvider.notifier).setDarkMode(enabled);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Theme storage failed: $error\n$stackTrace');
       if (mounted) {
         showAppNotification(context, 'Não foi possível salvar o tema.');
       }
