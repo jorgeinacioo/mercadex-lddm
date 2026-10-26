@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
 
 class AppBottomNavigation extends ConsumerWidget {
@@ -25,8 +24,10 @@ class AppBottomNavigation extends ConsumerWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.border)),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: Theme.of(context).colorScheme.outline),
+          ),
         ),
         child: NavigationBar(
           selectedIndex: selectedIndex == -1 ? 0 : selectedIndex,

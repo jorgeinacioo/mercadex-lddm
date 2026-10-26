@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:mercadex/core/config/app_config.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/core/widgets/app_search_field.dart';
 import 'package:mercadex/core/widgets/mercadex_logo.dart';
 import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
@@ -43,9 +42,9 @@ class HomePage extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               'Boas compras hoje!',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 20),
             AppSearchField(
@@ -130,8 +129,8 @@ class _BrandAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: AppColors.primary,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
         shape: BoxShape.circle,
       ),
       child: const Padding(
@@ -147,10 +146,12 @@ class _DebugChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(99)),
-        border: Border.fromBorderSide(BorderSide(color: AppColors.border)),
+        borderRadius: const BorderRadius.all(Radius.circular(99)),
+        border: Border.fromBorderSide(
+          BorderSide(color: Theme.of(context).colorScheme.outline),
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -160,7 +161,7 @@ class _DebugChip extends StatelessWidget {
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.4,
-            color: AppColors.textSecondary,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ),
@@ -190,13 +191,19 @@ class _HomeShortcut extends StatelessWidget {
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.10),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
               child: SizedBox(
                 width: 64,
                 height: 64,
-                child: Icon(icon, color: AppColors.primary, size: 28),
+                child: Icon(
+                  icon,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
               ),
             ),
             const SizedBox(height: 8),

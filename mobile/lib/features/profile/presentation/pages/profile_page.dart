@@ -23,7 +23,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     try {
       await ref.read(themeModeProvider.notifier).setDarkMode(enabled);
     } catch (_) {
-      if (mounted) showAppNotification(context, 'Não foi possível salvar o tema.');
+      if (mounted) {
+        showAppNotification(context, 'Não foi possível salvar o tema.');
+      }
     } finally {
       if (mounted) setState(() => _savingTheme = false);
     }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 
 class AppSearchField extends StatelessWidget {
   const AppSearchField({
@@ -21,7 +20,10 @@ class AppSearchField extends StatelessWidget {
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+        prefixIcon: Icon(
+          Icons.search,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

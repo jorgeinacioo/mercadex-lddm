@@ -12,10 +12,11 @@ Ajudar quem compra a encontrar o mesmo produto em mercados próximos, comparar a
 - Visualização de preços por supermercado
 - Scanner de código de barras com a câmera (`mobile_scanner`)
 - Informar preço: formulário de protótipo, sem persistir o valor
-- Lista de compras em memória
+- Lista de compras persistida em SQLite no dispositivo
 - Comparação de cesta
 - Login
 - Login salvo no armazenamento seguro do dispositivo até o token expirar (1 dia); senha não é salva
+- Tema claro/escuro com opção no Perfil, salva em SharedPreferences
 - Ícone Mercadex e tela de abertura nativa no Android e iOS
 - Suporte a mocks e à API HTTP
 

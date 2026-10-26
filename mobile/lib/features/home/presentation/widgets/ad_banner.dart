@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 
 class AdBanner extends StatefulWidget {
   const AdBanner({super.key});
@@ -49,9 +48,9 @@ class _AdBannerState extends State<AdBanner> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
         ),
         child: Stack(
           alignment: Alignment.bottomCenter,
@@ -62,14 +61,16 @@ class _AdBannerState extends State<AdBanner> {
               itemBuilder: (context, index) {
                 return Container(
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
                     child: Text(
                       'Anúncio ${index % _adCount + 1}',
-                      style: const TextStyle(
-                        color: AppColors.deepGreen,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -88,7 +89,9 @@ class _AdBannerState extends State<AdBanner> {
                     height: 8,
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
-                      color: isActive ? AppColors.primary : AppColors.border,
+                      color: isActive
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline,
                       borderRadius: BorderRadius.circular(99),
                     ),
                   );

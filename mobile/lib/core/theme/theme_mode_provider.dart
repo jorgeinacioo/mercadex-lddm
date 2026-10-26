@@ -7,8 +7,10 @@ final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
 );
 
 class ThemeModeNotifier extends Notifier<ThemeMode> {
-  ThemeModeNotifier({this.initialMode = ThemeMode.light, ThemePreferences? preferences})
-    : _preferences = preferences ?? SharedPreferencesThemePreferences();
+  ThemeModeNotifier({
+    this.initialMode = ThemeMode.light,
+    ThemePreferences? preferences,
+  }) : _preferences = preferences ?? SharedPreferencesThemePreferences();
 
   final ThemeMode initialMode;
   final ThemePreferences _preferences;

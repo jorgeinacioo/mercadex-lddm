@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/core/widgets/product_avatar.dart';
 
 class ProductSearchCard extends StatelessWidget {
@@ -34,7 +33,7 @@ class ProductSearchCard extends StatelessWidget {
                       name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),

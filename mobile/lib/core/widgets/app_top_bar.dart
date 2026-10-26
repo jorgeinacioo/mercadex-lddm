@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mercadex/core/config/app_config.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/core/widgets/mercadex_logo.dart';
 
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
@@ -18,14 +17,14 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       title: showBrand ? const MercadexLogo(markSize: 32) : Text(title),
       actions: [
         if (AppConfig.useMockData)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(right: 16),
             child: Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(99)),
+                  borderRadius: const BorderRadius.all(Radius.circular(99)),
                   border: Border.fromBorderSide(
-                    BorderSide(color: AppColors.border),
+                    BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                 ),
                 child: Padding(
@@ -36,7 +35,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.4,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),

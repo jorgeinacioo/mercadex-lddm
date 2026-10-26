@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mercadex/features/products/domain/search_product.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/core/widgets/product_avatar.dart';
 
 class HomeProductSection extends StatelessWidget {
@@ -52,7 +51,9 @@ class HomeProductSection extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.titleSmall
                                     ?.copyWith(
-                                      color: AppColors.ink,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),

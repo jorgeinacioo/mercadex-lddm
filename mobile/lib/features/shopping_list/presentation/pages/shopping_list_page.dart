@@ -8,7 +8,6 @@ import 'package:mercadex/features/shopping_list/presentation/providers/shopping_
 import 'package:mercadex/core/widgets/app_top_bar.dart';
 import 'package:mercadex/core/widgets/app_notification.dart';
 import 'package:mercadex/core/widgets/product_avatar.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 
 class ShoppingListPage extends ConsumerStatefulWidget {
   const ShoppingListPage({super.key});
@@ -193,7 +192,7 @@ class _ShoppingListCard extends StatelessWidget {
                           item.name,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                color: AppColors.deepGreen,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w700,
                               ),
                         ),
@@ -220,7 +219,7 @@ class _ShoppingListCard extends StatelessWidget {
               Text(
                 '${item.quantity}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -265,11 +264,11 @@ class _SortOrderControl extends StatelessWidget {
           child: SegmentedButton<ShoppingListSortOrder>(
             showSelectedIcon: false,
             style: SegmentedButton.styleFrom(
-              backgroundColor: AppColors.surface,
-              foregroundColor: AppColors.deepGreen,
-              selectedBackgroundColor: AppColors.primary,
-              selectedForegroundColor: AppColors.surface,
-              side: const BorderSide(color: AppColors.border),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+              selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
+              side: BorderSide(color: Theme.of(context).colorScheme.outline),
             ),
             segments: const [
               ButtonSegment(

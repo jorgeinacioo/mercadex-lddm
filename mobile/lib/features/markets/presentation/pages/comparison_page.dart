@@ -67,7 +67,7 @@ class ComparisonPage extends ConsumerWidget {
                 'Melhor opção para sua lista',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: AppColors.deepGreen,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -109,10 +109,14 @@ class ComparisonPage extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: isWinner ? AppColors.seed : Colors.white,
+                      color: isWinner
+                          ? AppColors.seed
+                          : Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: isWinner ? AppColors.seed : AppColors.cardBorder,
+                        color: isWinner
+                            ? AppColors.seed
+                            : Theme.of(context).colorScheme.outline,
                       ),
                     ),
                     child: Column(
@@ -124,7 +128,7 @@ class ComparisonPage extends ConsumerWidget {
                               ?.copyWith(
                                 color: isWinner
                                     ? Colors.white
-                                    : AppColors.deepGreen,
+                                    : Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w800,
                               ),
                         ),
@@ -154,7 +158,9 @@ class ComparisonPage extends ConsumerWidget {
                           _brl(comparison.totalCents),
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(
-                                color: isWinner ? Colors.white : AppColors.seed,
+                                color: isWinner
+                                    ? Colors.white
+                                    : Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w800,
                               ),
                         ),

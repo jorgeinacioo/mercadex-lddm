@@ -43,7 +43,7 @@ class DealCard extends StatelessWidget {
                       product,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.deepGreen,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -70,7 +70,7 @@ class DealCard extends StatelessWidget {
                     Text(
                       'R\$ ${price.replaceAll('.', ',')}',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w800,
                       ),
                     ),

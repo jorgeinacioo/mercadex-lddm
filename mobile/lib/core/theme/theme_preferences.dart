@@ -13,8 +13,7 @@ class SharedPreferencesThemePreferences implements ThemePreferences {
   final SharedPreferencesAsync _preferences;
 
   @override
-  Future<bool> readDarkMode() async =>
-      await _preferences.getBool(key) ?? false;
+  Future<bool> readDarkMode() async => await _preferences.getBool(key) ?? false;
 
   @override
   Future<void> writeDarkMode(bool enabled) =>

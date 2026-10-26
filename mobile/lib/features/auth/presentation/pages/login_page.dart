@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mercadex/features/auth/data/auth_repository.dart';
 import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/core/widgets/app_notification.dart';
 import 'package:mercadex/core/widgets/mercadex_logo.dart';
 
@@ -88,9 +87,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           Text(
             'Entre para continuar',
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 28),
           TextField(
@@ -111,18 +110,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           FilledButton(
             onPressed: _isSubmitting ? null : _login,
             child: Text(_isSubmitting ? 'Entrando...' : 'Entrar'),
-          ),
-          const SizedBox(height: 8),
-          Center(
-            child: TextButton(
-              onPressed: () {
-                showAppNotification(
-                  context,
-                  'A recuperação de senha ainda não está disponível.',
-                );
-              },
-              child: const Text('Esqueceu a senha?'),
-            ),
           ),
         ],
       ),

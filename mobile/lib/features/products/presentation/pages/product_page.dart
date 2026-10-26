@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mercadex/features/products/data/products_repository.dart';
 import 'package:mercadex/features/products/domain/product_deals.dart';
 import 'package:mercadex/features/shopping_list/presentation/providers/shopping_list_provider.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
 import 'package:mercadex/core/widgets/app_top_bar.dart';
 import 'package:mercadex/core/widgets/app_notification.dart';
 import 'package:mercadex/features/products/presentation/widgets/deal_card.dart';
@@ -84,14 +83,18 @@ class _ProductPageState extends ConsumerState<ProductPage> {
                 height: 220,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
                 child: Icon(
                   Icons.shopping_bag_outlined,
                   size: 72,
-                  color: AppColors.primary.withValues(alpha: 0.85),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.85),
                   semanticLabel: 'Foto do produto em breve',
                 ),
               ),
