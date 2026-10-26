@@ -52,7 +52,7 @@ O mobile segue organização por feature em `mobile/lib/features/`. Componentes 
 
 ## Executando o Mobile com Mocks
 
-Mocks são o padrão.
+Sem `API_URL`, mocks são o padrão.
 
 ```bash
 cd mobile
@@ -60,11 +60,11 @@ flutter pub get
 flutter run --dart-define=USE_MOCK_DATA=true
 ```
 
-`USE_MOCK_DATA=true` já é o valor padrão, então `flutter run` também usa dados mockados.
+Sem `API_URL`, `flutter run` usa dados mockados. Para forçar mocks mesmo com `API_URL`, use `USE_MOCK_DATA=true`.
 
 ## Executando com API
 
-O endereço vem de `API_URL` em `AppConfig`. Desligue os mocks na mesma execução.
+O endereço vem de `API_URL` em `AppConfig`. Definir `API_URL` já ativa a API; `USE_MOCK_DATA=false` também pode ser passado explicitamente. A busca, ofertas, supermercados, comparação da cesta e ofertas em destaque leem dados remotos. A lista de compras continua no SQLite local.
 
 iOS Simulator:
 

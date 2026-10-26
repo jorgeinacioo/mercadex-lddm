@@ -11,7 +11,7 @@ O Mercadex é um protótipo de comparação colaborativa de preços em supermerc
 - Dados de produtos, mercados e login vindos de mocks locais ou da API HTTP, escolhidos por `AppConfig`
 - Lista de compras persistida em SQLite local (`sqflite`), no arquivo `mercadex.db`
 
-`USE_MOCK_DATA` vale `true` por padrão. Com `USE_MOCK_DATA=false`, os repositórios HTTP usam `API_URL`.
+Sem `API_URL`, `USE_MOCK_DATA` vale `true` por padrão. Definir `API_URL` ativa os repositórios HTTP, a menos que `USE_MOCK_DATA=true` seja passado explicitamente. Produtos em destaque na tela inicial também vêm de `/products` nesse modo.
 
 O scanner de código de barras usa o pacote `mobile_scanner` e o widget `MobileScanner` na página do scanner. O formulário de informar preço ainda não envia nem persiste o valor. A sessão de login continua apenas em memória.
 

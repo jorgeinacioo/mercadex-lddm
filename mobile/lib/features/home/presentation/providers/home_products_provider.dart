@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mercadex/features/products/data/products_repository.dart';
 import 'package:mercadex/features/products/domain/search_product.dart';
 
-final hotTodayProductsProvider = Provider<List<SearchProduct>>((ref) {
-  final products = [...ProductsRepository.mockSearchProducts]
+final hotTodayProductsProvider = FutureProvider<List<SearchProduct>>((
+  ref,
+) async {
+  final products = [...await const ProductsRepository().getProducts()]
     ..shuffle(Random());
   return products.take(6).toList();
 });

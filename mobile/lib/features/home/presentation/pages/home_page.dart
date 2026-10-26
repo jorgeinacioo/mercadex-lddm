@@ -89,10 +89,16 @@ class HomePage extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 28),
-            HomeProductSection(
-              title: 'Ofertas em destaque',
-              products: hotTodayProducts,
-              emptyMessage: 'Nenhum produto disponível.',
+            hotTodayProducts.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, _) => const Text(
+                'Não foi possível carregar as ofertas em destaque.',
+              ),
+              data: (products) => HomeProductSection(
+                title: 'Ofertas em destaque',
+                products: products,
+                emptyMessage: 'Nenhum produto disponível.',
+              ),
             ),
             const SizedBox(height: 24),
             const AdBanner(),

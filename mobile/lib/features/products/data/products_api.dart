@@ -9,6 +9,19 @@ class ProductsApi {
 
   final ApiClient client;
 
+  Future<List<SearchProduct>> getProducts() async {
+    final response = await client.get('/products');
+
+    if (response.statusCode != 200) {
+      throw StateError('Não foi possível carregar os produtos.');
+    }
+
+    final data = jsonDecode(response.body) as List<dynamic>;
+    return data
+        .map((item) => SearchProduct.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<List<SearchProduct>> search(String query) async {
     final response = await client.get(
       '/search?query=${Uri.encodeQueryComponent(query)}',

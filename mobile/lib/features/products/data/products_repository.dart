@@ -164,6 +164,11 @@ class ProductsRepository {
     ),
   ];
 
+  Future<List<SearchProduct>> getProducts() {
+    if (AppConfig.useMockData) return Future.value(mockSearchProducts);
+    return api.getProducts();
+  }
+
   Future<List<SearchProduct>> search(String query) {
     if (!AppConfig.useMockData) {
       return api.search(query);
