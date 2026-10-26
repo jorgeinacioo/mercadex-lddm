@@ -19,7 +19,7 @@ A lista de compras é local ao dispositivo. Ela não é sincronizada com o Postg
 
 ## Backend
 
-- NestJS, organizado por domínio: `auth`, `favorites`, `markets`, `products`, `search` e `prisma`
+- NestJS, organizado por domínio: `auth`, `markets`, `products`, `search` e `prisma`
 - Prisma como acesso ao banco
 - PostgreSQL
 

@@ -24,7 +24,6 @@ model User {
   passwordHash      String
   role              UserRole           @default(USER)
   isActive          Boolean            @default(true)
-  favorites         Favorite[]
   priceObservations PriceObservation[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -37,7 +36,6 @@ model Product {
   packaging         String
   category          String
   tags              String[]           @default([])
-  favorites         Favorite[]
   priceObservations PriceObservation[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -87,15 +85,4 @@ model PriceObservation {
   @@index([productId, observedAt])
   @@index([branchId, observedAt])
   @@index([submittedById])
-}
-
-model Favorite {
-  userId    String
-  productId String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@id([userId, productId])
-  @@index([productId])
 }

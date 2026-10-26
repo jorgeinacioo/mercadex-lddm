@@ -65,7 +65,7 @@ Exceções não são descartadas. Se a gravação falha, o estado anterior da li
 | | SQLite | PostgreSQL |
 | --- | --- | --- |
 | Onde fica | Arquivo no dispositivo | Banco do backend |
-| O que guarda nesta sprint | Lista de compras | Usuários, produtos, mercados, preços e favoritos |
+| O que guarda nesta sprint | Lista de compras | Usuários, produtos, mercados e preços |
 | Acesso | `sqflite`, direto no app | NestJS e Prisma |
 | Conta | Não separa por usuário | Dados do servidor |
 | Sincronização | Nenhuma | Não recebe a lista local |
