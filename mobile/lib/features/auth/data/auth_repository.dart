@@ -6,11 +6,11 @@ class AuthRepository {
 
   final AuthApi api;
 
-  Future<String> login({required String email, required String password}) {
+  Future<String> login({required String username, required String password}) {
     if (AppConfig.useMockData) {
       return Future.value('mock-access-token');
     }
 
-    return api.login(email: email, password: password);
+    return api.login(username: username, password: password);
   }
 }

@@ -238,10 +238,10 @@ async function main() {
   const passwordHash = await hash('admin', 12);
 
   await prisma.user.upsert({
-    where: { email: 'admin@mercadex.local' },
-    update: { role: 'ADMIN', isActive: true },
+    where: { username: 'admin' },
+    update: { passwordHash, role: 'ADMIN', isActive: true },
     create: {
-      email: 'admin@mercadex.local',
+      username: 'admin',
       passwordHash,
       role: 'ADMIN',
     },

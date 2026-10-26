@@ -4,7 +4,7 @@ import { compare } from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 
 type LoginInput = {
-  email: string;
+  username: string;
   password: string;
 };
 
@@ -15,15 +15,15 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async login({ email, password }: LoginInput) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+  async login({ username, password }: LoginInput) {
+    const user = await this.prisma.user.findUnique({ where: { username } });
 
     if (
       !user ||
       !user.isActive ||
       !(await compare(password, user.passwordHash))
     ) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Invalid username or password');
     }
 
     return {

@@ -8,16 +8,16 @@ class AuthApi {
   final ApiClient client;
 
   Future<String> login({
-    required String email,
+    required String username,
     required String password,
   }) async {
     final response = await client.post('/auth/login', {
-      'email': email,
+      'username': username,
       'password': password,
     });
 
     if (response.statusCode != 201) {
-      throw StateError('E-mail ou senha inválidos.');
+      throw StateError('Usuário ou senha inválidos.');
     }
 
     return (jsonDecode(response.body) as Map<String, dynamic>)['accessToken']

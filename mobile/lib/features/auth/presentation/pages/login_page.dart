@@ -15,22 +15,22 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   var _isSubmitting = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _login() async {
-    final email = _emailController.text.trim();
+    final username = _usernameController.text.trim();
     final password = _passwordController.text;
-    if (email.isEmpty || password.isEmpty) {
-      showAppNotification(context, 'Informe seu e-mail e senha.');
+    if (username.isEmpty || password.isEmpty) {
+      showAppNotification(context, 'Informe seu usuário e senha.');
       return;
     }
 
@@ -38,16 +38,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     try {
       final accessToken = await const AuthRepository().login(
-        email: email,
+        username: username,
         password: password,
       );
       if (!mounted) {
         return;
       }
 
-      ref
+      await ref
           .read(authSessionProvider.notifier)
-          .logIn(email: email, accessToken: accessToken);
+          .logIn(username: username, accessToken: accessToken);
+      if (!mounted) return;
 
       showAppNotification(context, 'Login realizado com sucesso.');
       context.pop();
@@ -56,7 +57,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
 
-      showAppNotification(context, 'E-mail ou senha inválidos.');
+      showAppNotification(context, 'Usuário ou senha inválidos.');
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -93,11 +94,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
           const SizedBox(height: 28),
           TextField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
+            controller: _usernameController,
+            keyboardType: TextInputType.text,
             decoration: const InputDecoration(
-              labelText: 'E-mail',
-              hintText: 'seu@email.com',
+              labelText: 'Usuário',
+              hintText: 'admin',
             ),
           ),
           const SizedBox(height: 12),

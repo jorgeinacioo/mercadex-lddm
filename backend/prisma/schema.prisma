@@ -20,7 +20,7 @@ enum PriceObservationStatus {
 
 model User {
   id                String             @id @default(cuid())
-  email             String             @unique
+  username          String             @unique
   passwordHash      String
   role              UserRole           @default(USER)
   isActive          Boolean            @default(true)

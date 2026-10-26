@@ -20,7 +20,7 @@ class HomePage extends ConsumerWidget {
     final recentProducts = ref.watch(recentProductsProvider);
     final hotTodayProducts = ref.watch(hotTodayProductsProvider);
     final session = ref.watch(authSessionProvider);
-    final name = _firstName(session?.email);
+    final name = _firstName(session?.username);
 
     return Scaffold(
       body: SafeArea(
@@ -111,9 +111,9 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-String? _firstName(String? email) {
-  if (email == null || email.trim().isEmpty) return null;
-  final local = email.split('@').first.split(RegExp(r'[.\-_]')).first.trim();
+String? _firstName(String? username) {
+  if (username == null || username.trim().isEmpty) return null;
+  final local = username.split(RegExp(r'[.\-_]')).first.trim();
   if (local.isEmpty) return null;
   return local[0].toUpperCase() + local.substring(1);
 }

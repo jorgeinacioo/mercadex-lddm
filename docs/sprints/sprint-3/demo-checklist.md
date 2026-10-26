@@ -10,10 +10,10 @@ flutter pub get
 flutter run --dart-define=USE_MOCK_DATA=true
 ```
 
-`USE_MOCK_DATA=true` é o padrão. No mock, qualquer e-mail e senha não vazios entram. A sessão fica só em memória: depois de fechar o app, entre de novo para a aba Lista aparecer. Os itens devem continuar no SQLite local, sem separação por conta.
+`USE_MOCK_DATA=true` é o padrão. No mock, qualquer usuário e senha não vazios entram. A sessão fica só em memória: depois de fechar o app, entre de novo para a aba Lista aparecer. Os itens devem continuar no SQLite local, sem separação por conta.
 
 1. Abrir o Mercadex.
-2. Entrar com um e-mail e uma senha quaisquer.
+2. Entrar com um usuário e uma senha quaisquer.
 3. Abrir um produto.
 4. Tocar em “Adicionar à lista de compras”. A mensagem de sucesso só deve aparecer depois da gravação. Isso demonstra o CREATE.
 5. Abrir a aba Lista de compras e conferir nome, embalagem e quantidade. Isso demonstra o READ.

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mercadex/features/auth/data/auth_session_storage.dart';
 import 'package:mercadex/features/auth/domain/auth_session.dart';
 
 final authSessionProvider = NotifierProvider<AuthSessionNotifier, AuthSession?>(
@@ -6,14 +7,28 @@ final authSessionProvider = NotifierProvider<AuthSessionNotifier, AuthSession?>(
 );
 
 class AuthSessionNotifier extends Notifier<AuthSession?> {
-  @override
-  AuthSession? build() => null;
+  AuthSessionNotifier({
+    this.initialSession,
+    AuthSessionStorage? storage,
+  }) : _storage = storage ?? const SecureAuthSessionStorage();
 
-  void logIn({required String email, required String accessToken}) {
-    state = AuthSession(email: email, accessToken: accessToken);
+  final AuthSession? initialSession;
+  final AuthSessionStorage _storage;
+
+  @override
+  AuthSession? build() => initialSession;
+
+  Future<void> logIn({
+    required String username,
+    required String accessToken,
+  }) async {
+    final session = AuthSession(username: username, accessToken: accessToken);
+    await _storage.write(session);
+    state = session;
   }
 
-  void logOut() {
+  Future<void> logOut() async {
+    await _storage.clear();
     state = null;
   }
 }

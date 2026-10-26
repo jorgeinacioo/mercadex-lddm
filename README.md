@@ -15,6 +15,7 @@ Ajudar quem compra a encontrar o mesmo produto em mercados próximos, comparar a
 - Lista de compras em memória
 - Comparação de cesta
 - Login
+- Login salvo no armazenamento seguro do dispositivo até o token expirar (1 dia); senha não é salva
 - Suporte a mocks e à API HTTP
 
 ## Stack
@@ -103,7 +104,7 @@ BACKEND_PORT=3001
 O seed cria a conta administrativa de desenvolvimento:
 
 ```text
-Email: admin@mercadex.local
+Username: admin
 Password: admin
 ```
 

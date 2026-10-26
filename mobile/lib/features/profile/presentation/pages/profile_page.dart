@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
 import 'package:mercadex/core/widgets/app_top_bar.dart';
+import 'package:mercadex/core/widgets/app_notification.dart';
 import 'package:mercadex/core/widgets/mercadex_logo.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -32,7 +33,7 @@ class ProfilePage extends ConsumerWidget {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.person_outline),
-                title: Text(session.email),
+                title: Text(session.username),
                 subtitle: const Text('Conectado'),
               ),
             ),
@@ -41,7 +42,18 @@ class ProfilePage extends ConsumerWidget {
               child: ListTile(
                 leading: const Icon(Icons.logout),
                 title: const Text('Sair'),
-                onTap: () => ref.read(authSessionProvider.notifier).logOut(),
+                onTap: () async {
+                  try {
+                    await ref.read(authSessionProvider.notifier).logOut();
+                  } catch (_) {
+                    if (context.mounted) {
+                      showAppNotification(
+                        context,
+                        'Não foi possível sair. Tente novamente.',
+                      );
+                    }
+                  }
+                },
               ),
             ),
           ],
