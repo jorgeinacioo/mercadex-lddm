@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mercadex/features/markets/data/markets_repository.dart';
 import 'package:mercadex/features/markets/domain/market.dart';
+import 'package:mercadex/features/markets/presentation/widgets/market_logo.dart';
 
 class TopMarkets extends StatefulWidget {
   const TopMarkets({super.key});
@@ -56,26 +57,13 @@ class _TopMarketsState extends State<TopMarkets> {
                   return Padding(
                     padding: const EdgeInsets.only(right: 16),
                     child: SizedBox(
-                      width: 72,
+                      width: 104,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(28),
                         onTap: () => context.push('/market/${market.id}'),
                         child: Column(
                           children: [
-                            CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primary,
-                              child: Text(
-                                market.name[0],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
+                            MarketLogo(marketName: market.name),
                             const SizedBox(height: 8),
                             Text(
                               market.name,

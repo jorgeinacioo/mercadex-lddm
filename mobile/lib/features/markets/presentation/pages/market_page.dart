@@ -4,6 +4,7 @@ import 'package:mercadex/features/markets/data/markets_repository.dart';
 import 'package:mercadex/features/markets/domain/market.dart';
 import 'package:mercadex/core/widgets/app_top_bar.dart';
 import 'package:mercadex/features/products/presentation/widgets/product_search_card.dart';
+import 'package:mercadex/features/markets/presentation/widgets/market_logo.dart';
 
 class MarketPage extends StatefulWidget {
   const MarketPage({super.key, required this.marketId});
@@ -44,9 +45,17 @@ class _MarketPageState extends State<MarketPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text(
-                market.name,
-                style: Theme.of(context).textTheme.headlineSmall,
+              Row(
+                children: [
+                  MarketLogo(marketName: market.name, width: 88, height: 72),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      market.name,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               Text('Unidades', style: Theme.of(context).textTheme.titleLarge),

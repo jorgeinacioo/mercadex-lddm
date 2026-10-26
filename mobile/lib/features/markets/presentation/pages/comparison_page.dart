@@ -71,10 +71,35 @@ class ComparisonPage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                '${items.fold<int>(0, (sum, item) => sum + item.quantity)} unidades na lista',
+              ExpansionTile(
+                key: const PageStorageKey('basket-summary'),
+                title: Text(
+                  '${items.fold<int>(0, (sum, item) => sum + item.quantity)} unidades na lista',
+                ),
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                shape: const Border(),
+                collapsedShape: const Border(),
+                children: [
+                  for (final item in markets.first.items)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${item.quantity}x ${item.name}',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(_brl(item.subtotalCents)),
+                        ],
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               ...markets.asMap().entries.map((entry) {
                 final comparison = entry.value;
                 final isWinner = entry.key == 0;

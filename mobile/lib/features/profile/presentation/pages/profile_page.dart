@@ -5,13 +5,34 @@ import 'package:mercadex/features/auth/presentation/providers/auth_session_provi
 import 'package:mercadex/core/widgets/app_top_bar.dart';
 import 'package:mercadex/core/widgets/app_notification.dart';
 import 'package:mercadex/core/widgets/mercadex_logo.dart';
+import 'package:mercadex/core/theme/theme_mode_provider.dart';
 
-class ProfilePage extends ConsumerWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  bool _savingTheme = false;
+
+  Future<void> _setDarkMode(bool enabled) async {
+    if (_savingTheme) return;
+    setState(() => _savingTheme = true);
+    try {
+      await ref.read(themeModeProvider.notifier).setDarkMode(enabled);
+    } catch (_) {
+      if (mounted) showAppNotification(context, 'Não foi possível salvar o tema.');
+    } finally {
+      if (mounted) setState(() => _savingTheme = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final session = ref.watch(authSessionProvider);
+    final darkMode = ref.watch(themeModeProvider) == ThemeMode.dark;
 
     return Scaffold(
       appBar: const AppTopBar(title: 'Perfil'),
@@ -57,6 +78,15 @@ class ProfilePage extends ConsumerWidget {
               ),
             ),
           ],
+          const SizedBox(height: 8),
+          Card(
+            child: SwitchListTile(
+              secondary: const Icon(Icons.dark_mode_outlined),
+              title: const Text('Modo escuro'),
+              value: darkMode,
+              onChanged: _savingTheme ? null : _setDarkMode,
+            ),
+          ),
           const SizedBox(height: 8),
           Card(
             child: ListTile(

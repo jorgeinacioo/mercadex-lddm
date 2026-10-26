@@ -40,10 +40,23 @@ void main() {
         4378,
         4558,
       ]);
+      expect(results.first.items.map((item) => item.subtotalCents), [
+        2999,
+        1299,
+      ]);
+      expect(
+        results.first.items.fold<int>(
+          0,
+          (total, item) => total + item.subtotalCents,
+        ),
+        results.first.totalCents,
+      );
 
       await list.add(productId: 'arroz-5kg', name: 'Arroz', packaging: '5kg');
       final updated = await container.read(marketComparisonProvider.future);
       expect(updated.first.totalCents, 7297);
+      expect(updated.first.items.first.quantity, 2);
+      expect(updated.first.items.first.subtotalCents, 5998);
     },
   );
 }

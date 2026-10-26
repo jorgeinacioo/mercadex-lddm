@@ -53,6 +53,8 @@ O mobile segue organização por feature em `mobile/lib/features/`. Componentes 
 
 Os arquivos fonte do ícone e da tela de abertura ficam em `mobile/assets/branding/`. Após alterar as imagens PNG, regenere os recursos nativos com `flutter pub run flutter_launcher_icons` e `flutter pub run flutter_native_splash:create` dentro de `mobile/`.
 
+Os logotipos dos supermercados ficam empacotados no app em `mobile/assets/markets/` (fontes em `mobile/assets/markets/SOURCES.md`); não são armazenados no SQLite nem no PostgreSQL.
+
 ## Executando o Mobile com Mocks
 
 Sem `API_URL`, mocks são o padrão.

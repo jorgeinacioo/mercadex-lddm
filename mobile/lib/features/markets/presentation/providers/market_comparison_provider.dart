@@ -17,6 +17,7 @@ final marketComparisonProvider = FutureProvider<List<MarketComparison>>((
   final totals = <String, int>{};
   final coverage = <String, int>{};
   final names = <String, String>{};
+  final itemsByMarket = <String, List<MarketComparisonItem>>{};
 
   for (var i = 0; i < products.length; i++) {
     final cheapest = <String, int>{};
@@ -28,12 +29,18 @@ final marketComparisonProvider = FutureProvider<List<MarketComparison>>((
       names[deal.marketId] = deal.marketName;
     }
     for (final entry in cheapest.entries) {
+      final item = MarketComparisonItem(
+        name: items[i].name,
+        quantity: items[i].quantity,
+        unitPriceCents: entry.value,
+      );
       totals.update(
         entry.key,
-        (total) => total + entry.value * items[i].quantity,
-        ifAbsent: () => entry.value * items[i].quantity,
+        (total) => total + item.subtotalCents,
+        ifAbsent: () => item.subtotalCents,
       );
       coverage.update(entry.key, (count) => count + 1, ifAbsent: () => 1);
+      itemsByMarket.putIfAbsent(entry.key, () => []).add(item);
     }
   }
 
@@ -45,6 +52,7 @@ final marketComparisonProvider = FutureProvider<List<MarketComparison>>((
           marketId: entry.key,
           marketName: names[entry.key]!,
           totalCents: entry.value,
+          items: itemsByMarket[entry.key]!,
         ),
   ]..sort((a, b) {
     final result = a.totalCents.compareTo(b.totalCents);
