@@ -18,7 +18,9 @@ A interface não executa SQL. O provider só atualiza o estado depois que o repo
 | `data/shopping_list_repository.dart` | CRUD, transações e conversão entre linhas SQLite e `ShoppingListItem`. |
 | `domain/shopping_list_item.dart` | Produto, embalagem, quantidade e datas. |
 | `presentation/providers/shopping_list_provider.dart` | Carga inicial, estado assíncrono e operações da interface. |
-| `presentation/pages/shopping_list_page.dart` | Lista, quantidades, remoção, loading e erro. |
+| `presentation/pages/shopping_list_page.dart` | Lista, quantidades, remoção, loading, erro e controle de ordenação. |
+| `data/shopping_list_preferences.dart` | Leitura e gravação de `shopping_list_sort_order` com SharedPreferences. |
+| `presentation/providers/shopping_list_sort_order_provider.dart` | Estado da preferência de ordenação. |
 
 `shoppingListRepositoryProvider` entrega a implementação SQLite. Os testes substituem esse provider por um fake ou por um banco temporário.
 
@@ -71,3 +73,14 @@ Exceções não são descartadas. Se a gravação falha, o estado anterior da li
 | Sincronização | Nenhuma | Não recebe a lista local |
 
 A demonstração com mocks não precisa do Docker. A lista continua sendo gravada no SQLite do aparelho.
+
+## Ordenação com SharedPreferences
+
+A tela da lista lê `shopping_list_sort_order` por um provider próprio, `shoppingListSortOrderProvider`. O `ShoppingListRepository` não guarda essa preferência.
+
+| Valor | Apresentação |
+| --- | --- |
+| `created_at` | Ordem de adição, a mesma da leitura do SQLite. É o padrão. |
+| `name_asc` | Nome do produto, de A a Z. |
+
+A troca grava a chave e só então atualiza a tela. Se a leitura falhar, a lista aparece na ordem de adição e a interface avisa. Se a gravação falhar, a escolha anterior permanece e a mensagem de sucesso não aparece. Quantidades e linhas do SQLite não mudam. A comparação continua usando os itens na ordem devolvida pelo banco.

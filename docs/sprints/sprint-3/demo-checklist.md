@@ -25,6 +25,11 @@ flutter run --dart-define=USE_MOCK_DATA=true
 11. Tocar em “Comparar supermercados” e confirmar que o total usa a quantidade restaurada.
 12. Tocar em “Remover” e ver o item sair da lista. Isso demonstra o DELETE.
 13. Fechar e abrir de novo, entrar se precisar, e confirmar que o item removido não voltou.
+14. Com pelo menos dois produtos de nomes diferentes, tocar em “Nome A–Z” e conferir que a ordem da tela muda e as quantidades continuam iguais.
+15. Fechar o aplicativo por completo, abrir de novo, entrar se precisar, e confirmar que “Nome A–Z” continua selecionado.
+16. Tocar em “Adição” e confirmar que a lista volta à ordem em que os produtos foram incluídos.
+
+A etapa 14 demonstra a troca da preferência. A etapa 15 é a evidência de que o valor sobrevive ao reinício. Este roteiro não registra uma execução já feita.
 
 Também vale mostrar, se der tempo:
 
