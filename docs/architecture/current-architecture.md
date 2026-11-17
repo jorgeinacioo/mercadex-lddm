@@ -10,6 +10,7 @@ O Mercadex é um protótipo de comparação colaborativa de preços em supermerc
 - Repositórios por feature (`auth`, `products`, `markets`, `shopping_list`)
 - Dados de produtos, mercados e login vindos de mocks locais ou da API HTTP, escolhidos por `AppConfig`
 - Lista de compras persistida em SQLite local (`sqflite`), no arquivo `mercadex.db`
+- Ordenação da lista guardada em SharedPreferences, na chave `shopping_list_sort_order`
 
 `USE_MOCK_DATA` vale `true` por padrão. Com `USE_MOCK_DATA=false`, os repositórios HTTP usam `API_URL`.
 
@@ -41,6 +42,10 @@ Flutter
   → ShoppingListNotifier
   → ShoppingListRepository
   → SQLite (mercadex.db no dispositivo)
+
+Flutter
+  → ShoppingListSortOrderNotifier
+  → SharedPreferences (shopping_list_sort_order)
 ```
 
 Novas tecnologias entram somente quando uma entrega precisar delas.
