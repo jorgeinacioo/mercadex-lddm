@@ -1,5 +1,7 @@
 import 'package:mercadex/features/shopping_list/domain/shopping_list_sort_order.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mercadex/core/storage/string_preference_store.dart';
+
+export 'package:mercadex/core/storage/string_preference_store.dart';
 
 const shoppingListSortOrderKey = 'shopping_list_sort_order';
 
@@ -10,26 +12,6 @@ class ShoppingListPreferencesException implements Exception {
 
   @override
   String toString() => message;
-}
-
-abstract class StringPreferenceStore {
-  Future<String?> getString(String key);
-
-  Future<void> setString(String key, String value);
-}
-
-class SharedPreferencesStringStore implements StringPreferenceStore {
-  SharedPreferencesStringStore({SharedPreferencesAsync? preferences})
-    : _preferences = preferences ?? SharedPreferencesAsync();
-
-  final SharedPreferencesAsync _preferences;
-
-  @override
-  Future<String?> getString(String key) => _preferences.getString(key);
-
-  @override
-  Future<void> setString(String key, String value) =>
-      _preferences.setString(key, value);
 }
 
 abstract class ShoppingListPreferences {

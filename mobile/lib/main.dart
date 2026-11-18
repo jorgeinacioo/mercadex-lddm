@@ -24,6 +24,9 @@ Future<void> main() async {
   });
   runApp(
     ProviderScope(
+      // Errors show at once with a "Tentar novamente" button instead of
+      // Riverpod retrying silently for about 40 seconds.
+      retry: (_, _) => null,
       overrides: [
         authSessionProvider.overrideWith(
           () => AuthSessionNotifier(initialSession: session, storage: storage),

@@ -18,36 +18,38 @@ class MemoryAuthSessionStorage implements AuthSessionStorage {
 }
 
 void main() {
-  test('login survives a new provider and logout clears the saved session', () async {
-    final storage = MemoryAuthSessionStorage();
-    final first = ProviderContainer(
-      overrides: [
-        authSessionProvider.overrideWith(
-          () => AuthSessionNotifier(storage: storage),
-        ),
-      ],
-    );
-    await first.read(authSessionProvider.notifier).logIn(
-      username: 'admin',
-      accessToken: 'test-token',
-    );
-    expect(storage.session?.username, 'admin');
-    first.dispose();
-
-    final second = ProviderContainer(
-      overrides: [
-        authSessionProvider.overrideWith(
-          () => AuthSessionNotifier(
-            initialSession: storage.session,
-            storage: storage,
+  test(
+    'login survives a new provider and logout clears the saved session',
+    () async {
+      final storage = MemoryAuthSessionStorage();
+      final first = ProviderContainer(
+        overrides: [
+          authSessionProvider.overrideWith(
+            () => AuthSessionNotifier(storage: storage),
           ),
-        ),
-      ],
-    );
-    expect(second.read(authSessionProvider)?.username, 'admin');
-    await second.read(authSessionProvider.notifier).logOut();
-    expect(second.read(authSessionProvider), isNull);
-    expect(await storage.read(), isNull);
-    second.dispose();
-  });
+        ],
+      );
+      await first
+          .read(authSessionProvider.notifier)
+          .logIn(username: 'admin', accessToken: 'test-token');
+      expect(storage.session?.username, 'admin');
+      first.dispose();
+
+      final second = ProviderContainer(
+        overrides: [
+          authSessionProvider.overrideWith(
+            () => AuthSessionNotifier(
+              initialSession: storage.session,
+              storage: storage,
+            ),
+          ),
+        ],
+      );
+      expect(second.read(authSessionProvider)?.username, 'admin');
+      await second.read(authSessionProvider.notifier).logOut();
+      expect(second.read(authSessionProvider), isNull);
+      expect(await storage.read(), isNull);
+      second.dispose();
+    },
+  );
 }

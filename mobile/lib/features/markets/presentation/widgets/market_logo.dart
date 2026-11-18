@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
+import 'package:mercadex/core/format/text.dart';
 
+/// Brand logo of a supermarket chain, on a white tile so it reads in both
+/// themes. Unknown chains show a store icon.
 class MarketLogo extends StatelessWidget {
   const MarketLogo({
     super.key,
@@ -15,34 +17,42 @@ class MarketLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final asset = switch (marketName.toLowerCase()) {
-      'carrefour' => 'assets/markets/carrefour.png',
-      'pão de açúcar' => 'assets/markets/pao-de-acucar.png',
-      'assaí atacadista' => 'assets/markets/assai.png',
-      'atacadão' => 'assets/markets/atacadao.png',
-      _ => null,
-    };
+    final asset = marketLogoAsset(marketName);
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       width: width,
       height: height,
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsets.all(height * 0.14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        border: Border.all(color: scheme.outline),
+        borderRadius: BorderRadius.circular(height * 0.26),
       ),
       child: asset == null
-          ? _fallback()
+          ? _fallback(scheme)
           : Image.asset(
               asset,
               fit: BoxFit.contain,
               semanticLabel: 'Logo do supermercado $marketName',
-              errorBuilder: (_, _, _) => _fallback(),
+              errorBuilder: (_, _, _) => _fallback(scheme),
             ),
     );
   }
 
-  Widget _fallback() =>
-      const Icon(Icons.storefront_outlined, color: AppColors.primary);
+  Widget _fallback(ColorScheme scheme) => Icon(
+    Icons.storefront_outlined,
+    color: const Color(0xFF16A34A),
+    size: height * 0.5,
+  );
+}
+
+String? marketLogoAsset(String marketName) {
+  return switch (normalizeText(marketName)) {
+    'carrefour' => 'assets/markets/carrefour.png',
+    'pao de acucar' => 'assets/markets/pao-de-acucar.png',
+    'assai atacadista' || 'assai' => 'assets/markets/assai.png',
+    'atacadao' => 'assets/markets/atacadao.png',
+    _ => null,
+  };
 }

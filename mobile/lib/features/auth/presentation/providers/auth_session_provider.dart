@@ -7,10 +7,8 @@ final authSessionProvider = NotifierProvider<AuthSessionNotifier, AuthSession?>(
 );
 
 class AuthSessionNotifier extends Notifier<AuthSession?> {
-  AuthSessionNotifier({
-    this.initialSession,
-    AuthSessionStorage? storage,
-  }) : _storage = storage ?? const SecureAuthSessionStorage();
+  AuthSessionNotifier({this.initialSession, AuthSessionStorage? storage})
+    : _storage = storage ?? const SecureAuthSessionStorage();
 
   final AuthSession? initialSession;
   final AuthSessionStorage _storage;

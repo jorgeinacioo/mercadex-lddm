@@ -1,51 +1,107 @@
 # Arquitetura atual
 
-O Mercadex é um protótipo de comparação colaborativa de preços em supermercados. A organização abaixo descreve o código desta branch, sem antecipar tecnologias que ainda não entram no fluxo.
+O Mercadex é um protótipo de comparação colaborativa de preços em supermercados. Este documento descreve o código da versão entregue no TI4.
+
+## Visão geral
+
+```text
+Flutter (iOS / Android)
+ ├─ SQLite (mercadex.db) ............ lista de compras
+ ├─ SharedPreferences ............... ordenação da lista, tema, vistos recentemente
+ ├─ Armazenamento seguro ............ sessão (token JWT)
+ └─ HTTP + JSON ──► NestJS ──► Prisma ──► PostgreSQL
+                     (Docker Compose)
+```
+
+O PostgreSQL é a única fonte de verdade para produtos, supermercados e preços. A lista de compras é pessoal e fica só no aparelho.
 
 ## Mobile
 
-- Flutter e Dart
-- Riverpod para estado
-- GoRouter, com `StatefulShellRoute` na navegação inferior
-- Repositórios por feature (`auth`, `products`, `markets`, `shopping_list`)
-- Dados de produtos, mercados e login vindos de mocks locais ou da API HTTP, escolhidos por `AppConfig`
-- Lista de compras persistida em SQLite local (`sqflite`), no arquivo `mercadex.db`
-- Ordenação da lista guardada em SharedPreferences, na chave `shopping_list_sort_order`
+Organização por feature em `mobile/lib/features/` (`auth`, `home`, `markets`, `prices`, `products`, `profile`, `scanner`, `shopping_list`), cada uma com `data`, `domain` e `presentation` quando necessário. Código compartilhado fica em `mobile/lib/core/` (configuração, rede, tema, formatação, widgets).
 
-Sem `API_URL`, `USE_MOCK_DATA` vale `true` por padrão. Definir `API_URL` ativa os repositórios HTTP, a menos que `USE_MOCK_DATA=true` seja passado explicitamente. Produtos em destaque na tela inicial também vêm de `/products` nesse modo.
+- **Estado:** Riverpod 3. Os repositórios são expostos por providers (`productsRepositoryProvider`, `marketsRepositoryProvider`, `pricesRepositoryProvider`, `authRepositoryProvider`, `shoppingListRepositoryProvider`), o que permite trocá-los nos testes.
+- **Dados remotos em cache:** `productDealsProvider(id)` guarda os preços de um produto e é compartilhado pela página do produto, pela lista e pela comparação. Ao publicar um preço, o provider é invalidado e as três telas se atualizam.
+- **Navegação:** GoRouter, com `StatefulShellRoute` para as abas Início, Lista e Perfil.
+- **Rede:** `ApiClient` aplica timeout de 10 s e converte falhas em `ApiException` (sem conexão, 401, 404, 5xx), exibidas com mensagens em português e opção de tentar de novo.
+- **Dinheiro:** valores em centavos inteiros (`core/format/money.dart`), formatados como `R$ 1.234,56`.
 
-O scanner de código de barras usa o pacote `mobile_scanner` e o widget `MobileScanner` na página do scanner. O formulário de informar preço ainda não envia nem persiste o valor. A sessão de login continua apenas em memória.
+### Modo API e modo demonstração
 
-A lista de compras é local ao dispositivo. Ela não é sincronizada com o PostgreSQL e, nesta versão, não é separada por conta.
+`AppConfig` decide a fonte dos dados:
+
+| Configuração | Fonte |
+| --- | --- |
+| `USE_MOCK_DATA=false` + `API_URL` | API NestJS |
+| sem `API_URL` (padrão) | catálogo empacotado `assets/demo/catalog.json` |
+
+O catálogo empacotado é uma cópia de `backend/prisma/seed/catalog.json`, o mesmo arquivo que o seed grava no banco. No modo demonstração, publicar preço fica desabilitado com uma explicação, porque o valor não seria visto por outras pessoas.
+
+### Persistência local
+
+| Dado | Tecnologia | Chave / arquivo |
+| --- | --- | --- |
+| Lista de compras | SQLite (`sqflite`) | `mercadex.db`, tabela `shopping_list_items` |
+| Ordenação da lista | SharedPreferences | `shopping_list_sort_order` |
+| Tema escuro | SharedPreferences | `dark_mode` |
+| Vistos recentemente | SharedPreferences | `recent_products` (JSON, até 8 itens) |
+| Sessão | `flutter_secure_storage` (Keychain/Keystore) | `auth_session` |
+
+A lista não é separada por conta e não é enviada ao servidor. Ela funciona sem login.
 
 ## Backend
 
-- NestJS, organizado por domínio: `auth`, `markets`, `products`, `search` e `prisma`
-- Prisma como acesso ao banco
-- PostgreSQL
+NestJS organizado por domínio, no fluxo Controller → Service → Prisma → PostgreSQL:
 
-## Fluxo dos dados remotos
+| Módulo | Responsabilidade |
+| --- | --- |
+| `auth` | Login com usuário e senha (bcrypt) e emissão de JWT; `JwtAuthGuard` |
+| `products` | Catálogo com menor e maior preço, busca por código de barras e preços por produto |
+| `search` | Busca por nome, marca, categoria e código, sem diferenciar acentos |
+| `markets` | Redes, unidades e preço de cada produto na rede |
+| `prices` | Publicação de preços por usuários autenticados |
+| `prisma` | Conexão com o PostgreSQL |
+
+A entrada é validada por `ValidationPipe` global com DTOs (`class-validator`); campos não previstos são rejeitados.
+
+### Endpoints
+
+| Método | Rota | Autenticação | Uso no app |
+| --- | --- | --- | --- |
+| GET | `/health` | — | verificação |
+| POST | `/auth/login` | — | login |
+| GET | `/products` | — | início, catálogo |
+| GET | `/search?query=` | — | busca |
+| GET | `/products/barcode/:barcode` | — | scanner |
+| GET | `/products/:id/deals` | — | produto, lista, comparação |
+| GET | `/markets` | — | início, informar preço |
+| GET | `/markets/:id` | — | supermercado, informar preço |
+| POST | `/prices` | JWT | informar preço |
+
+### Publicação de preços
+
+`POST /prices` recebe `productId`, `branchId` e `price`. O autor vem do token (`sub`), nunca do corpo da requisição. Em uma transação, o preço ativo anterior daquele produto naquela unidade passa para `EXPIRED` e o novo é criado como `ACTIVE`. Assim, cada prateleira tem um único preço vigente e a comparação nunca mistura valores antigos e novos.
+
+Os preços publicados entram ativos imediatamente. Não há moderação nesta versão.
+
+### Banco de dados
+
+Modelos Prisma: `User`, `Product` (com `barcode` único), `Market`, `MarketBranch` e `PriceObservation` (status `PENDING`, `ACTIVE`, `REJECTED` ou `EXPIRED`). As mudanças de schema são feitas por migrations em `backend/prisma/migrations/`.
+
+O seed lê `catalog.json` (4 redes, 54 produtos, preços por unidade) e cria as contas de demonstração. Ele pode ser executado de novo sem reativar preços que usuários substituíram.
+
+## Fluxo da comparação
 
 ```text
-Flutter
-  → Repository
-  → Mock ou HTTP API
-  → NestJS
-  → Prisma
-  → PostgreSQL
+Lista (SQLite)
+  → productDealsProvider para cada item
+  → menor preço de cada produto em cada rede × quantidade
+  → ranking só com cestas completas
+  → mercados incompletos listados à parte, com os produtos que faltam
 ```
 
-## Fluxo da lista de compras
+## Limitações conhecidas
 
-```text
-Flutter
-  → ShoppingListNotifier
-  → ShoppingListRepository
-  → SQLite (mercadex.db no dispositivo)
-
-Flutter
-  → ShoppingListSortOrderNotifier
-  → SharedPreferences (shopping_list_sort_order)
-```
-
-Novas tecnologias entram somente quando uma entrega precisar delas.
+- Preços, endereços e códigos de barras do catálogo são fictícios (EAN-13 de uso interno, prefixo 200).
+- Não há cadastro de usuários pelo app; as contas vêm do seed.
+- Localização e distância até as lojas não são usadas, apesar de o banco guardar latitude e longitude.
+- A busca filtra o catálogo em memória no backend, adequado ao tamanho atual do catálogo.

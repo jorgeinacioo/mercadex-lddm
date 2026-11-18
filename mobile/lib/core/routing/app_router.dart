@@ -1,22 +1,18 @@
 import 'package:go_router/go_router.dart';
-import 'package:mercadex/features/markets/presentation/pages/comparison_page.dart';
-import 'package:mercadex/features/home/presentation/pages/home_page.dart';
+import 'package:mercadex/core/widgets/app_bottom_navigation.dart';
 import 'package:mercadex/features/auth/presentation/pages/login_page.dart';
+import 'package:mercadex/features/home/presentation/pages/home_page.dart';
+import 'package:mercadex/features/markets/presentation/pages/comparison_page.dart';
 import 'package:mercadex/features/markets/presentation/pages/market_page.dart';
-import 'package:mercadex/features/profile/presentation/pages/profile_page.dart';
+import 'package:mercadex/features/prices/presentation/pages/submit_price_page.dart';
 import 'package:mercadex/features/products/presentation/pages/product_page.dart';
 import 'package:mercadex/features/products/presentation/pages/search_results_page.dart';
-import 'package:mercadex/features/shopping_list/presentation/pages/shopping_list_page.dart';
-import 'package:mercadex/features/prices/presentation/pages/submit_price_page.dart';
+import 'package:mercadex/features/profile/presentation/pages/profile_page.dart';
 import 'package:mercadex/features/scanner/presentation/pages/scanner_page.dart';
-import 'package:mercadex/core/widgets/app_bottom_navigation.dart';
+import 'package:mercadex/features/shopping_list/presentation/pages/shopping_list_page.dart';
 
 final appRouter = GoRouter(
   routes: [
-    GoRoute(
-      path: '/compare',
-      builder: (context, state) => const ComparisonPage(),
-    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return AppBottomNavigation(navigationShell: navigationShell);
@@ -45,7 +41,15 @@ final appRouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+    GoRoute(
+      path: '/compare',
+      builder: (context, state) => const ComparisonPage(),
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) =>
+          LoginPage(reason: state.uri.queryParameters['reason']),
+    ),
     GoRoute(path: '/scan', builder: (context, state) => const ScannerPage()),
     GoRoute(
       path: '/market/:marketId',

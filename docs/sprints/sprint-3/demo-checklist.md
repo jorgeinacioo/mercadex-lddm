@@ -10,7 +10,9 @@ flutter pub get
 flutter run --dart-define=USE_MOCK_DATA=true
 ```
 
-`USE_MOCK_DATA=true` é o padrão. No mock, qualquer usuário e senha não vazios entram. A sessão fica só em memória: depois de fechar o app, entre de novo para a aba Lista aparecer. Os itens devem continuar no SQLite local, sem separação por conta.
+`USE_MOCK_DATA=true` é o padrão. Os itens devem continuar no SQLite local, sem separação por conta.
+
+> Atualização do TI4: a aba Lista não exige mais login, porque a lista é local ao aparelho; o login passou a ser pedido só para informar preços. Os passos que mencionam entrar podem ser pulados. No modo demonstração, as contas aceitas são `admin`/`admin`, `jorge`/`mercadex` e `fernando`/`mercadex`.
 
 1. Abrir o Mercadex.
 2. Entrar com um usuário e uma senha quaisquer.

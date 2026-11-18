@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
+import 'package:mercadex/features/shopping_list/presentation/providers/shopping_list_provider.dart';
 
+/// The shopping list lives on the device, so every tab is available without
+/// signing in. An account is only needed to contribute prices.
 class AppBottomNavigation extends ConsumerWidget {
   const AppBottomNavigation({super.key, required this.navigationShell});
 
@@ -10,16 +12,7 @@ class AppBottomNavigation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loggedIn = ref.watch(authSessionProvider) != null;
-    final visibleBranches = loggedIn ? [0, 1, 2] : [0, 2];
-    final selectedIndex = visibleBranches.indexOf(navigationShell.currentIndex);
-
-    if (selectedIndex == -1) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) return;
-        navigationShell.goBranch(0);
-      });
-    }
+    final listCount = ref.watch(shoppingListProvider).asData?.value.length ?? 0;
 
     return Scaffold(
       body: navigationShell,
@@ -30,26 +23,30 @@ class AppBottomNavigation extends ConsumerWidget {
           ),
         ),
         child: NavigationBar(
-          selectedIndex: selectedIndex == -1 ? 0 : selectedIndex,
-          onDestinationSelected: (index) {
-            final branch = visibleBranches[index];
-            navigationShell.goBranch(
-              branch,
-              initialLocation: branch == navigationShell.currentIndex,
-            );
-          },
+          selectedIndex: navigationShell.currentIndex,
+          onDestinationSelected: (index) => navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          ),
           destinations: [
             const NavigationDestination(
               icon: Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home),
               label: 'Início',
             ),
-            if (loggedIn)
-              const NavigationDestination(
-                icon: Icon(Icons.list_alt_outlined),
-                selectedIcon: Icon(Icons.list_alt),
-                label: 'Lista',
+            NavigationDestination(
+              icon: Badge(
+                isLabelVisible: listCount > 0,
+                label: Text('$listCount'),
+                child: const Icon(Icons.list_alt_outlined),
               ),
+              selectedIcon: Badge(
+                isLabelVisible: listCount > 0,
+                label: Text('$listCount'),
+                child: const Icon(Icons.list_alt),
+              ),
+              label: 'Lista',
+            ),
             const NavigationDestination(
               icon: Icon(Icons.person_outline),
               selectedIcon: Icon(Icons.person),

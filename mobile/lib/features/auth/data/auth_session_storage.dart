@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mercadex/core/config/app_config.dart';
+import 'package:mercadex/features/auth/data/auth_repository.dart';
 import 'package:mercadex/features/auth/domain/auth_session.dart';
 
 abstract class AuthSessionStorage {
@@ -30,7 +31,8 @@ class SecureAuthSessionStorage implements AuthSessionStorage {
           token.isEmpty ||
           data['mock'] != AppConfig.useMockData ||
           (AppConfig.useMockData &&
-              (username != 'admin' || token != 'mock-access-token')) ||
+              (!demoAccounts.containsKey(username) ||
+                  token != mockAccessToken)) ||
           (!AppConfig.useMockData && !_isValidToken(token))) {
         await clear();
         return null;
