@@ -10,10 +10,12 @@ flutter pub get
 flutter run --dart-define=USE_MOCK_DATA=true
 ```
 
-`USE_MOCK_DATA=true` é o padrão. No mock, qualquer e-mail e senha não vazios entram. A sessão fica só em memória: depois de fechar o app, entre de novo para a aba Lista aparecer. Os itens devem continuar no SQLite local, sem separação por conta.
+`USE_MOCK_DATA=true` é o padrão. Os itens devem continuar no SQLite local, sem separação por conta.
+
+> Atualização do TI4: a aba Lista não exige mais login, porque a lista é local ao aparelho; o login passou a ser pedido só para informar preços. Os passos que mencionam entrar podem ser pulados. No modo demonstração, as contas aceitas são `admin`/`admin`, `jorge`/`mercadex` e `fernando`/`mercadex`.
 
 1. Abrir o Mercadex.
-2. Entrar com um e-mail e uma senha quaisquer.
+2. Entrar com um usuário e uma senha quaisquer.
 3. Abrir um produto.
 4. Tocar em “Adicionar à lista de compras”. A mensagem de sucesso só deve aparecer depois da gravação. Isso demonstra o CREATE.
 5. Abrir a aba Lista de compras e conferir nome, embalagem e quantidade. Isso demonstra o READ.
@@ -25,6 +27,11 @@ flutter run --dart-define=USE_MOCK_DATA=true
 11. Tocar em “Comparar supermercados” e confirmar que o total usa a quantidade restaurada.
 12. Tocar em “Remover” e ver o item sair da lista. Isso demonstra o DELETE.
 13. Fechar e abrir de novo, entrar se precisar, e confirmar que o item removido não voltou.
+14. Com pelo menos dois produtos de nomes diferentes, tocar em “Nome A–Z” e conferir que a ordem da tela muda e as quantidades continuam iguais.
+15. Fechar o aplicativo por completo, abrir de novo, entrar se precisar, e confirmar que “Nome A–Z” continua selecionado.
+16. Tocar em “Adição” e confirmar que a lista volta à ordem em que os produtos foram incluídos.
+
+A etapa 14 demonstra a troca da preferência. A etapa 15 é a evidência de que o valor sobrevive ao reinício. Este roteiro não registra uma execução já feita.
 
 Também vale mostrar, se der tempo:
 

@@ -1,119 +1,124 @@
 # Mercadex
 
-Aplicativo colaborativo de comparação de preços em supermercados.
+**Compare preços. Compre melhor.**
 
-## Objetivo
+Aplicativo colaborativo de comparação de preços em supermercados. Quem compra pesquisa produtos, vê o preço em cada rede, monta a lista de compras e descobre em qual supermercado a compra inteira sai mais barata. Quem vê um preço diferente na prateleira pode informá-lo, e o valor passa a valer para todos.
 
-Ajudar quem compra a encontrar o mesmo produto em mercados próximos, comparar a cesta e registrar preços observados pela comunidade.
+Projeto Integrado I — Desenvolvimento Móvel. Equipe: Jorge Inácio e Fernando Vieira.
 
-## Funcionalidades atuais
+## Funcionalidades
 
-- Busca de produtos
-- Visualização de preços por supermercado
-- Scanner de código de barras com a câmera (`mobile_scanner`)
-- Informar preço: formulário de protótipo, sem persistir o valor
-- Lista de compras em memória
-- Comparação de cesta
-- Login
-- Suporte a mocks e à API HTTP
+| Funcionalidade | Como funciona |
+| --- | --- |
+| Busca | Por nome, marca, categoria ou código de barras, sem diferenciar acentos ("cafe" encontra "Café"). Sem termo, lista todos os produtos com filtro por categoria. |
+| Produto | Preço em cada supermercado, do mais barato ao mais caro, com destaque para o menor preço e quanto se economiza. Mostra se o preço é de referência ou informado por um usuário, e há quanto tempo. |
+| Supermercados | Unidades, endereço e preço de cada produto naquela rede. |
+| Lista de compras | CRUD em SQLite no aparelho (`mercadex.db`): adicionar, alterar quantidade e remover. A ordenação (adição ou nome A–Z) fica em SharedPreferences. |
+| Comparação da cesta | Soma a lista em cada rede, considerando as quantidades. Só cestas completas entram no ranking; mercados sem algum produto aparecem à parte, com o que falta. |
+| Informar preço | Exige login. O preço é enviado à API, que registra o autor a partir do token e substitui o preço anterior daquela unidade. |
+| Scanner | Lê EAN-13/EAN-8/UPC/Code 128 com a câmera e abre o produto. Também aceita digitar o código, o que permite usar o simulador. |
+| Conta | Login com JWT; a sessão fica no armazenamento seguro do aparelho até o token expirar (1 dia). |
+| Preferências | Tema claro/escuro e produtos vistos recentemente, em SharedPreferences. |
+
+Os preços e endereços do catálogo são **fictícios**, criados para demonstração. Os nomes das redes são usados apenas como exemplo.
 
 ## Stack
 
-Mobile:
-
-- Flutter
-- Dart
-- Riverpod
-- GoRouter
-- HTTP
-- mobile_scanner
-
-Backend:
-
-- NestJS
-- Prisma
-- PostgreSQL
-
-Infra:
-
-- Docker Compose
-
-## Estrutura do repositório
+- **Mobile:** Flutter, Dart, Riverpod 3, GoRouter, `http`, `sqflite`, `shared_preferences`, `flutter_secure_storage`, `mobile_scanner`
+- **Backend:** NestJS, Prisma 7, PostgreSQL 16, JWT, `class-validator`
+- **Infra:** Docker Compose
 
 ```text
-backend/     API NestJS e Prisma
-mobile/      aplicativo Flutter
-docs/        arquitetura atual e sprints
-docker-compose.yml
+backend/     API NestJS e Prisma (schema, migrations e seed)
+mobile/      aplicativo Flutter, organizado por feature em lib/features/
+docs/        arquitetura, sprints e material de demonstração
 ```
 
-O mobile segue organização por feature em `mobile/lib/features/`. Componentes compartilhados ficam em `mobile/lib/core/`.
+O catálogo de demonstração é um único arquivo, `backend/prisma/seed/catalog.json`, usado pelo seed do banco. O app traz uma cópia em `mobile/assets/demo/catalog.json` para o modo offline; um teste garante que as duas cópias são iguais.
 
-## Executando o Mobile com Mocks
+## Executando
 
-Mocks são o padrão.
+### 1. Backend (API + banco)
+
+```bash
+cp .env.example .env          # defina um JWT_SECRET próprio
+docker compose up --build
+```
+
+O Compose sobe o PostgreSQL, aplica as migrations, roda o seed e inicia a API em `http://127.0.0.1:3001` (porta `BACKEND_PORT`).
+
+Para recomeçar com o banco limpo (por exemplo, antes de uma apresentação):
+
+```bash
+docker compose down -v && docker compose up --build
+```
+
+Contas criadas pelo seed (somente desenvolvimento):
+
+| Usuário | Senha |
+| --- | --- |
+| `jorge` | `mercadex` |
+| `fernando` | `mercadex` |
+| `admin` | `admin` |
+
+Verificação rápida de todos os endpoints usados pelo app (publica um preço de teste):
+
+```bash
+cd backend && ./scripts/smoke-test.sh
+```
+
+### 2. App conectado à API
 
 ```bash
 cd mobile
 flutter pub get
-flutter run --dart-define=USE_MOCK_DATA=true
+
+# iOS Simulator
+flutter run --dart-define=USE_MOCK_DATA=false --dart-define=API_URL=http://127.0.0.1:3001
+
+# Android Emulator
+flutter run --dart-define=USE_MOCK_DATA=false --dart-define=API_URL=http://10.0.2.2:3001
 ```
 
-`USE_MOCK_DATA=true` já é o valor padrão, então `flutter run` também usa dados mockados.
+Num celular físico, use o IP do computador na rede local (por exemplo `http://192.168.0.10:3001`) e mantenha os dois na mesma rede.
 
-## Executando com API
-
-O endereço vem de `API_URL` em `AppConfig`. Desligue os mocks na mesma execução.
-
-iOS Simulator:
+### 3. App em modo demonstração (sem backend)
 
 ```bash
-flutter run \
-  --dart-define=USE_MOCK_DATA=false \
-  --dart-define=API_URL=http://127.0.0.1:3001
+cd mobile
+flutter run
 ```
 
-Android Emulator:
+Sem `API_URL`, o app usa o catálogo empacotado e mostra o selo "Modo demo". Busca, produtos, lista, comparação e scanner funcionam; publicar preços exige a API e o app avisa isso em vez de simular sucesso. As contas da tabela acima também funcionam no modo demo.
+
+## Testes
 
 ```bash
-flutter run \
-  --dart-define=USE_MOCK_DATA=false \
-  --dart-define=API_URL=http://10.0.2.2:3001
+cd mobile
+flutter analyze
+flutter test
+
+# Fluxo completo no simulador, com a API rodando:
+flutter test integration_test -d <id-do-simulador> \
+  --dart-define=USE_MOCK_DATA=false --dart-define=API_URL=http://127.0.0.1:3001
 ```
-
-A porta `3001` corresponde a `BACKEND_PORT` do `.env.example`.
-
-## Backend
-
-Copie `.env.example` para `.env` e suba os serviços:
 
 ```bash
-docker compose up --build
+cd backend
+npm run lint
+npm run build
+./scripts/smoke-test.sh
 ```
 
-O Compose sobe PostgreSQL 16, aplica as migrations, executa o seed e inicia a API. Credenciais de desenvolvimento do exemplo:
+O teste de integração busca "cafe", entra como `jorge`, publica um preço e confere que ele aparece como o melhor preço. Ele grava dados reais no banco.
 
-```text
-POSTGRES_DB=mercadex
-POSTGRES_USER=mercadex
-POSTGRES_PASSWORD=change_me
-BACKEND_PORT=3001
-```
+## Demonstração do scanner
 
-O seed cria a conta administrativa de desenvolvimento:
+O simulador não tem câmera: use "Digitar o código" na tela do scanner. Para ler com a câmera de um celular, abra [docs/demo/etiquetas-codigo-de-barras.html](docs/demo/etiquetas-codigo-de-barras.html) no computador ou imprima a página. Para usar um produto real, troque o campo `barcode` desse produto no `catalog.json` pelo código da embalagem, copie o arquivo para `mobile/assets/demo/` e rode o seed de novo.
 
-```text
-Email: admin@mercadex.local
-Password: admin
-```
+## Documentação
 
-`JWT_SECRET` é exigido pelo serviço `backend` e precisa estar definido no ambiente do Compose.
+- [Arquitetura atual](docs/architecture/current-architecture.md)
+- [Sprints](docs/sprints/)
 
-## Equipe
-
-- Jorge Inácio
-- Fernando Vieira
-
-## Organização acadêmica
-
-As entregas ficam documentadas em [docs/sprints/](docs/sprints/).
+Os arquivos do ícone e da tela de abertura ficam em `mobile/assets/branding/`; depois de alterá-los, rode `dart run flutter_launcher_icons` e `dart run flutter_native_splash:create` em `mobile/`. Os logotipos dos supermercados ficam em `mobile/assets/markets/` (fontes em `SOURCES.md`).

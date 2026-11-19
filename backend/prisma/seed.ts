@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, UserRole } from '@prisma/client';
 import { hash } from 'bcryptjs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -14,238 +14,125 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString }),
 });
 
-type ProductSeed = {
+type CatalogBranch = {
+  id: string;
+  name: string;
+  unitLabel: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+};
+
+type CatalogMarket = {
+  id: string;
+  name: string;
+  branches: CatalogBranch[];
+};
+
+type CatalogProduct = {
   id: string;
   name: string;
   brand: string;
   packaging: string;
   category: string;
   tags: string[];
+  barcode: string;
+  // Price per branch id, as a decimal string ("8.99").
+  prices: Record<string, string>;
 };
 
-const marketSeeds = [
-  {
-    id: 'freshmart',
-    name: 'Carrefour',
-    branch: {
-      id: 'freshmart-central',
-      name: 'Carrefour Central',
-      unitLabel: 'Central',
-      address: '100 Market Street',
-      latitude: -23.55052,
-      longitude: -46.633308,
-    },
-  },
-  {
-    id: 'value-foods',
-    name: 'Pão de Açúcar',
-    branch: {
-      id: 'value-foods-central',
-      name: 'Pão de Açúcar Central',
-      unitLabel: 'Central',
-      address: '200 Market Street',
-      latitude: -23.55252,
-      longitude: -46.635308,
-    },
-  },
-  {
-    id: 'green-grocer',
-    name: 'Assaí Atacadista',
-    branch: {
-      id: 'green-grocer-central',
-      name: 'Assaí Atacadista Central',
-      unitLabel: 'Central',
-      address: '300 Market Street',
-      latitude: -23.55452,
-      longitude: -46.637308,
-    },
-  },
-  {
-    id: 'daily-market',
-    name: 'Atacadão',
-    branch: {
-      id: 'daily-market-central',
-      name: 'Atacadão Central',
-      unitLabel: 'Central',
-      address: '400 Market Street',
-      latitude: -23.55652,
-      longitude: -46.639308,
-    },
-  },
+type Catalog = {
+  markets: CatalogMarket[];
+  products: CatalogProduct[];
+};
+
+// Development accounts only. Never reuse these credentials outside local demos.
+const demoUsers = [
+  { username: 'admin', password: 'admin', role: UserRole.ADMIN },
+  { username: 'jorge', password: 'mercadex', role: UserRole.USER },
+  { username: 'fernando', password: 'mercadex', role: UserRole.USER },
 ];
 
-const basePriceByProductId: Record<string, number> = {
-  'coke-2l': 8.99,
-  'agua-1-5l': 3.49,
-  'cafe-500g': 18.99,
-  'leite-1l': 5.49,
-  'iogurte-natural-170g': 3.29,
-  'manteiga-200g': 12.99,
-  'mussarela-200g': 14.99,
-  'arroz-5kg': 29.99,
-  'feijao-1kg': 8.49,
-  'macarrao-500g': 5.99,
-  'farinha-trigo-1kg': 6.29,
-  'aveia-170g': 8.99,
-  'acucar-1kg': 4.99,
-  'sal-1kg': 2.49,
-  'oleo-soja-900ml': 8.99,
-  'molho-tomate-300g': 3.49,
-  'milho-lata-170g': 4.29,
-  'ervilha-lata-170g': 4.29,
-  'atum-lata-170g': 9.99,
-  'sardinha-lata-125g': 6.99,
-  'banana-prata-1kg': 3.99,
-  'banana-nanica-1kg': 4.29,
-  'banana-organica-1kg': 5.99,
-  'maca-gala-1kg': 10.99,
-  'laranja-pera-1kg': 5.99,
-  'tomate-1kg': 8.99,
-  'batata-1kg': 5.49,
-  'cebola-1kg': 4.99,
-  'cenoura-1kg': 5.99,
-  'alface-un': 3.99,
-  'pao-forma-500g': 9.99,
-  'ovos-12un': 12.99,
-  'peito-frango-1kg': 18.99,
-  'carne-moida-1kg': 34.99,
-};
-
-const priceObservationSeeds = [
-  {
-    id: 'banana-prata-freshmart',
-    productId: 'banana-prata-1kg',
-    branchId: 'freshmart-central',
-    price: 3.99,
-    status: 'ACTIVE' as const,
-    observedAt: new Date('2026-09-25T10:00:00Z'),
-  },
-  {
-    id: 'banana-nanica-value-foods',
-    productId: 'banana-nanica-1kg',
-    branchId: 'value-foods-central',
-    price: 4.29,
-    status: 'ACTIVE' as const,
-    observedAt: new Date('2026-09-26T10:00:00Z'),
-  },
-  {
-    id: 'banana-prata-value-foods',
-    productId: 'banana-prata-1kg',
-    branchId: 'value-foods-central',
-    price: 4.19,
-    status: 'ACTIVE' as const,
-    observedAt: new Date('2026-09-26T12:00:00Z'),
-  },
-  {
-    id: 'banana-prata-daily-market',
-    productId: 'banana-prata-1kg',
-    branchId: 'daily-market-central',
-    price: 4.49,
-    status: 'ACTIVE' as const,
-    observedAt: new Date('2026-09-27T09:00:00Z'),
-  },
-  {
-    id: 'banana-organica-green-grocer',
-    productId: 'banana-organica-1kg',
-    branchId: 'green-grocer-central',
-    price: 5.99,
-    status: 'ACTIVE' as const,
-    observedAt: new Date('2026-09-27T10:00:00Z'),
-  },
+// Markets created by earlier seeds, replaced by the ids in catalog.json.
+const legacyMarketIds = [
+  'freshmart',
+  'value-foods',
+  'green-grocer',
+  'daily-market',
 ];
 
 async function main() {
-  const products: ProductSeed[] = JSON.parse(
-    await readFile(join(__dirname, 'seed', 'products.json'), 'utf8'),
-  );
+  const catalog = JSON.parse(
+    await readFile(join(__dirname, 'seed', 'catalog.json'), 'utf8'),
+  ) as Catalog;
 
-  for (const product of products) {
-    await prisma.product.upsert({
-      where: { id: product.id },
-      update: product,
-      create: product,
-    });
-  }
+  await prisma.market.deleteMany({ where: { id: { in: legacyMarketIds } } });
 
-  for (const market of marketSeeds) {
+  for (const market of catalog.markets) {
     await prisma.market.upsert({
       where: { id: market.id },
       update: { name: market.name },
       create: { id: market.id, name: market.name },
     });
 
-    await prisma.marketBranch.upsert({
-      where: { id: market.branch.id },
-      update: {
+    for (const branch of market.branches) {
+      const data = {
         marketId: market.id,
-        name: market.branch.name,
-        unitLabel: market.branch.unitLabel,
-        address: market.branch.address,
-        latitude: market.branch.latitude,
-        longitude: market.branch.longitude,
-      },
-      create: {
-        id: market.branch.id,
-        marketId: market.id,
-        name: market.branch.name,
-        unitLabel: market.branch.unitLabel,
-        address: market.branch.address,
-        latitude: market.branch.latitude,
-        longitude: market.branch.longitude,
-      },
-    });
-  }
-
-  const branchIds = marketSeeds.map((market) => market.branch.id);
-  for (const [index, product] of products.entries()) {
-    const price = basePriceByProductId[product.id];
-    if (price == null) {
-      throw new Error(`Missing base price for ${product.id}`);
+        name: branch.name,
+        unitLabel: branch.unitLabel,
+        address: branch.address,
+        latitude: branch.latitude,
+        longitude: branch.longitude,
+      };
+      await prisma.marketBranch.upsert({
+        where: { id: branch.id },
+        update: data,
+        create: { id: branch.id, ...data },
+      });
     }
+  }
 
-    await prisma.priceObservation.upsert({
-      where: { id: `${product.id}-base-price` },
-      update: {
-        productId: product.id,
-        branchId: branchIds[index % branchIds.length],
-        price,
-        status: 'ACTIVE',
-      },
+  for (const { prices, ...product } of catalog.products) {
+    await prisma.product.upsert({
+      where: { id: product.id },
+      update: product,
+      create: product,
+    });
+
+    for (const [branchId, price] of Object.entries(prices)) {
+      const id = `seed-${product.id}-${branchId}`;
+      // The status is set only on creation, so prices replaced by users stay
+      // expired when the seed runs again.
+      await prisma.priceObservation.upsert({
+        where: { id },
+        update: { price },
+        create: {
+          id,
+          productId: product.id,
+          branchId,
+          price,
+          status: 'ACTIVE',
+        },
+      });
+    }
+  }
+
+  for (const user of demoUsers) {
+    const passwordHash = await hash(user.password, 12);
+    await prisma.user.upsert({
+      where: { username: user.username },
+      update: { passwordHash, role: user.role, isActive: true },
       create: {
-        id: `${product.id}-base-price`,
-        productId: product.id,
-        branchId: branchIds[index % branchIds.length],
-        price,
-        status: 'ACTIVE',
+        username: user.username,
+        passwordHash,
+        role: user.role,
       },
     });
   }
 
-  for (const observation of priceObservationSeeds) {
-    await prisma.priceObservation.upsert({
-      where: { id: observation.id },
-      update: {
-        productId: observation.productId,
-        branchId: observation.branchId,
-        price: observation.price,
-        status: observation.status,
-        observedAt: observation.observedAt,
-      },
-      create: observation,
-    });
-  }
-
-  const passwordHash = await hash('admin', 12);
-
-  await prisma.user.upsert({
-    where: { email: 'admin@mercadex.local' },
-    update: { role: 'ADMIN', isActive: true },
-    create: {
-      email: 'admin@mercadex.local',
-      passwordHash,
-      role: 'ADMIN',
-    },
-  });
+  console.log(
+    `Seed: ${catalog.markets.length} markets, ${catalog.products.length} products, ${demoUsers.length} users.`,
+  );
 }
 
 void main()

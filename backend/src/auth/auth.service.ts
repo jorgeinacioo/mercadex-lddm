@@ -2,11 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
-
-type LoginInput = {
-  email: string;
-  password: string;
-};
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,19 +11,22 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async login({ email, password }: LoginInput) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+  async login({ username, password }: LoginDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { username: username.trim().toLowerCase() },
+    });
 
     if (
       !user ||
       !user.isActive ||
       !(await compare(password, user.passwordHash))
     ) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Invalid username or password');
     }
 
     return {
       accessToken: await this.jwt.signAsync({ role: user.role, sub: user.id }),
+      user: { username: user.username, role: user.role },
     };
   }
 }

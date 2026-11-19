@@ -1,31 +1,33 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PriceObservationStatus } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { normalizeText } from '../products/product-summary';
+import { ProductsService } from '../products/products.service';
 
 @Injectable()
 export class SearchService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly products: ProductsService) {}
 
-  async search(query: string) {
-    const searchQuery = query?.trim();
-    if (!searchQuery) {
+  // The catalog is small, so matching runs in memory. This keeps accent- and
+  // case-insensitive search simple without a PostgreSQL extension.
+  async search(query: string | undefined) {
+    const terms = normalizeText(query ?? '')
+      .split(/\s+/)
+      .filter(Boolean);
+    if (terms.length === 0) {
       throw new BadRequestException('Query is required');
     }
 
-    return this.prisma.product.findMany({
-      where: {
-        OR: [
-          { name: { contains: searchQuery, mode: 'insensitive' } },
-          { brand: { contains: searchQuery, mode: 'insensitive' } },
-          { category: { contains: searchQuery, mode: 'insensitive' } },
-          { tags: { has: searchQuery.toLowerCase() } },
-        ],
-        priceObservations: {
-          some: { status: PriceObservationStatus.ACTIVE },
-        },
-      },
-      select: { id: true, name: true, packaging: true },
-      orderBy: { name: 'asc' },
+    const products = await this.products.findAll();
+    return products.filter((product) => {
+      const text = normalizeText(
+        [
+          product.name,
+          product.brand,
+          product.category,
+          product.barcode ?? '',
+          ...product.tags,
+        ].join(' '),
+      );
+      return terms.every((term) => text.includes(term));
     });
   }
 }

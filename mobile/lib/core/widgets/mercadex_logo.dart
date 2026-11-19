@@ -27,14 +27,19 @@ class MercadexLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mark = MercadexMark(size: markSize, onDark: onDark);
+    final mark = MercadexMark(
+      size: markSize,
+      onDark: onDark || Theme.of(context).brightness == Brightness.dark,
+    );
     final word = _Wordmark(fontSize: markSize * 0.56, onDark: onDark);
     final tagline = Text(
       slogan,
       textAlign: centered ? TextAlign.center : TextAlign.start,
       style: TextStyle(
         fontFamily: 'Inter',
-        color: onDark ? AppColors.surface : AppColors.textSecondary,
+        color: onDark
+            ? AppColors.surface
+            : Theme.of(context).colorScheme.onSurfaceVariant,
         fontSize: markSize * 0.28,
         fontWeight: FontWeight.w500,
         height: 1.3,
@@ -100,12 +105,18 @@ class _Wordmark extends StatelessWidget {
         children: [
           TextSpan(
             text: 'Mercad',
-            style: TextStyle(color: onDark ? AppColors.surface : AppColors.ink),
+            style: TextStyle(
+              color: onDark
+                  ? AppColors.surface
+                  : Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           TextSpan(
             text: 'ex',
             style: TextStyle(
-              color: onDark ? AppColors.surface : AppColors.primary,
+              color: onDark
+                  ? AppColors.surface
+                  : Theme.of(context).colorScheme.primary,
             ),
           ),
         ],

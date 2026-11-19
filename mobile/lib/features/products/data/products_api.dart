@@ -1,38 +1,46 @@
-import 'dart:convert';
-
 import 'package:mercadex/core/network/api_client.dart';
 import 'package:mercadex/features/products/domain/product_deals.dart';
-import 'package:mercadex/features/products/domain/search_product.dart';
+import 'package:mercadex/features/products/domain/product_summary.dart';
 
 class ProductsApi {
   const ProductsApi({this.client = const ApiClient()});
 
   final ApiClient client;
 
-  Future<List<SearchProduct>> search(String query) async {
-    final response = await client.get(
-      '/search?query=${Uri.encodeQueryComponent(query)}',
+  Future<List<ProductSummary>> getProducts() async {
+    return _summaries(await client.getJson('/products'));
+  }
+
+  Future<List<ProductSummary>> search(String query) async {
+    return _summaries(
+      await client.getJson('/search?query=${Uri.encodeQueryComponent(query)}'),
     );
+  }
 
-    if (response.statusCode != 200) {
-      throw StateError('Não foi possível carregar os produtos.');
+  /// Returns null when no product uses this barcode.
+  Future<ProductSummary?> findByBarcode(String barcode) async {
+    try {
+      final json = await client.getJson(
+        '/products/barcode/${Uri.encodeComponent(barcode)}',
+      );
+      return ProductSummary.fromJson(json! as Map<String, dynamic>);
+    } on ApiException catch (error) {
+      if (error.isNotFound) return null;
+      rethrow;
     }
-
-    final data = jsonDecode(response.body) as List<dynamic>;
-    return data
-        .map((item) => SearchProduct.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   Future<ProductDeals> getProductDeals(String productId) async {
-    final response = await client.get('/products/$productId/deals');
-
-    if (response.statusCode != 200) {
-      throw StateError('Não foi possível carregar as ofertas do produto.');
-    }
-
-    return ProductDeals.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+    final json = await client.getJson(
+      '/products/${Uri.encodeComponent(productId)}/deals',
     );
+    return ProductDeals.fromJson(json! as Map<String, dynamic>);
+  }
+
+  List<ProductSummary> _summaries(Object? json) {
+    return [
+      for (final item in json! as List<dynamic>)
+        ProductSummary.fromJson(item as Map<String, dynamic>),
+    ];
   }
 }

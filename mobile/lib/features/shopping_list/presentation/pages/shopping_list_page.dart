@@ -7,8 +7,10 @@ import 'package:mercadex/features/shopping_list/presentation/providers/shopping_
 import 'package:mercadex/features/shopping_list/presentation/providers/shopping_list_sort_order_provider.dart';
 import 'package:mercadex/core/widgets/app_top_bar.dart';
 import 'package:mercadex/core/widgets/app_notification.dart';
-import 'package:mercadex/core/widgets/product_avatar.dart';
-import 'package:mercadex/core/theme/app_colors.dart';
+import 'package:mercadex/core/format/money.dart';
+import 'package:mercadex/core/widgets/category_avatar.dart';
+import 'package:mercadex/core/widgets/state_views.dart';
+import 'package:mercadex/features/products/presentation/providers/products_providers.dart';
 
 class ShoppingListPage extends ConsumerStatefulWidget {
   const ShoppingListPage({super.key});
@@ -82,14 +84,13 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
       ),
       body: itemsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: TextButton(
-            onPressed: () => ref.invalidate(shoppingListProvider),
-            child: const Text(
-              'Não foi possível carregar a lista. Tentar novamente',
-            ),
-          ),
-        ),
+        error: (error, stackTrace) {
+          debugPrint('Shopping list load failed: $error\n$stackTrace');
+          return ErrorView(
+            message: 'Não foi possível carregar a lista.',
+            onRetry: () => ref.invalidate(shoppingListProvider),
+          );
+        },
         data: (loaded) {
           final sortAsync = ref.watch(shoppingListSortOrderProvider);
           if (sortAsync.isLoading && !sortAsync.hasValue) {
@@ -109,8 +110,14 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
               ),
               Expanded(
                 child: visible.isEmpty
-                    ? const Center(
-                        child: Text('Sua lista de compras está vazia.'),
+                    ? MessageView(
+                        icon: Icons.shopping_basket_outlined,
+                        title: 'Sua lista de compras está vazia.',
+                        message:
+                            'Busque produtos e toque em "Adicionar à lista" '
+                            'para montar sua compra.',
+                        actionLabel: 'Buscar produtos',
+                        onAction: () => context.push('/search'),
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
@@ -183,7 +190,7 @@ class _ShoppingListCard extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               child: Row(
                 children: [
-                  const ProductAvatar(),
+                  _ItemAvatar(productId: item.productId),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -193,7 +200,7 @@ class _ShoppingListCard extends StatelessWidget {
                           item.name,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                color: AppColors.deepGreen,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w700,
                               ),
                         ),
@@ -202,6 +209,7 @@ class _ShoppingListCard extends StatelessWidget {
                           item.packaging,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
+                        _BestPrice(productId: item.productId),
                       ],
                     ),
                   ),
@@ -220,7 +228,7 @@ class _ShoppingListCard extends StatelessWidget {
               Text(
                 '${item.quantity}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -265,11 +273,11 @@ class _SortOrderControl extends StatelessWidget {
           child: SegmentedButton<ShoppingListSortOrder>(
             showSelectedIcon: false,
             style: SegmentedButton.styleFrom(
-              backgroundColor: AppColors.surface,
-              foregroundColor: AppColors.deepGreen,
-              selectedBackgroundColor: AppColors.primary,
-              selectedForegroundColor: AppColors.surface,
-              side: const BorderSide(color: AppColors.border),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+              selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
+              side: BorderSide(color: Theme.of(context).colorScheme.outline),
             ),
             segments: const [
               ButtonSegment(
@@ -290,6 +298,46 @@ class _SortOrderControl extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ItemAvatar extends ConsumerWidget {
+  const _ItemAvatar({required this.productId});
+
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final category =
+        ref.watch(productDealsProvider(productId)).asData?.value.category ?? '';
+    return CategoryAvatar(category: category);
+  }
+}
+
+/// Cheapest price of the item, loaded with the same data as the comparison.
+class _BestPrice extends ConsumerWidget {
+  const _BestPrice({required this.productId});
+
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final best = ref
+        .watch(productDealsProvider(productId))
+        .asData
+        ?.value
+        .bestDeal;
+    if (best == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Text(
+        'a partir de ${formatBrl(best.priceCents)} no ${best.marketName}',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

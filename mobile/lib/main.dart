@@ -3,16 +3,51 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mercadex/core/routing/app_router.dart';
 import 'package:mercadex/core/theme/app_theme.dart';
+import 'package:mercadex/core/theme/theme_mode_provider.dart';
+import 'package:mercadex/core/theme/theme_preferences.dart';
+import 'package:mercadex/features/auth/data/auth_session_storage.dart';
+import 'package:mercadex/features/auth/presentation/providers/auth_session_provider.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MercadexApp()));
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  const storage = SecureAuthSessionStorage();
+  final session = await storage.read().catchError((Object error) {
+    debugPrint('Auth session load failed: $error');
+    return null;
+  });
+  final themePreferences = SharedPreferencesThemePreferences();
+  final darkMode = await themePreferences.readDarkMode().catchError((
+    Object error,
+  ) {
+    debugPrint('Theme load failed: $error');
+    return false;
+  });
+  runApp(
+    ProviderScope(
+      // Errors show at once with a "Tentar novamente" button instead of
+      // Riverpod retrying silently for about 40 seconds.
+      retry: (_, _) => null,
+      overrides: [
+        authSessionProvider.overrideWith(
+          () => AuthSessionNotifier(initialSession: session, storage: storage),
+        ),
+        themeModeProvider.overrideWith(
+          () => ThemeModeNotifier(
+            initialMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+            preferences: themePreferences,
+          ),
+        ),
+      ],
+      child: const MercadexApp(),
+    ),
+  );
 }
 
-class MercadexApp extends StatelessWidget {
+class MercadexApp extends ConsumerWidget {
   const MercadexApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'Mercadex',
       locale: const Locale('pt', 'BR'),
@@ -20,6 +55,8 @@ class MercadexApp extends StatelessWidget {
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ref.watch(themeModeProvider),
       routerConfig: appRouter,
     );
   }

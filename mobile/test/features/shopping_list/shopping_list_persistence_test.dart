@@ -10,6 +10,7 @@ import 'package:mercadex/features/shopping_list/presentation/providers/shopping_
 import 'package:path/path.dart' as path;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../../helpers/test_catalog.dart';
 import 'fake_shopping_list_repository.dart';
 
 final _databases = <ShoppingListDatabase>[];
@@ -205,6 +206,7 @@ void main() {
     test('comparison follows persisted quantity changes and removal', () async {
       final container = ProviderContainer(
         overrides: [
+          ...catalogOverrides(),
           shoppingListRepositoryProvider.overrideWithValue(
             FakeShoppingListRepository(),
           ),
@@ -221,20 +223,20 @@ void main() {
       );
 
       final compared = await container.read(marketComparisonProvider.future);
-      expect(compared.first.totalCents, 4298);
+      expect(compared.best!.totalCents, 2999 + 1299);
 
       await list.add(productId: 'arroz-5kg', name: 'Arroz', packaging: '5kg');
       expect(
         (await container.read(
           marketComparisonProvider.future,
-        )).first.totalCents,
-        7297,
+        )).best!.totalCents,
+        2 * 2999 + 1299,
       );
 
       await list.remove('manteiga-200g');
       final afterDelete = await container.read(marketComparisonProvider.future);
-      expect(afterDelete.first.marketId, 'green-grocer');
-      expect(afterDelete.first.totalCents, 5998);
+      expect(afterDelete.best!.marketId, 'parcial');
+      expect(afterDelete.best!.totalCents, 2 * 2500);
     });
   });
 }

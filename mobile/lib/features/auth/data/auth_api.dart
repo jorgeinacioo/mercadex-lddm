@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:mercadex/core/network/api_client.dart';
 
 class AuthApi {
@@ -7,20 +5,21 @@ class AuthApi {
 
   final ApiClient client;
 
-  Future<String> login({
-    required String email,
+  /// Returns the access token and the username stored by the server.
+  Future<({String accessToken, String username})> login({
+    required String username,
     required String password,
   }) async {
-    final response = await client.post('/auth/login', {
-      'email': email,
-      'password': password,
-    });
-
-    if (response.statusCode != 201) {
-      throw StateError('E-mail ou senha inválidos.');
-    }
-
-    return (jsonDecode(response.body) as Map<String, dynamic>)['accessToken']
-        as String;
+    final json =
+        await client.postJson('/auth/login', {
+              'username': username,
+              'password': password,
+            })
+            as Map<String, dynamic>;
+    final user = json['user'] as Map<String, dynamic>?;
+    return (
+      accessToken: json['accessToken'] as String,
+      username: user?['username'] as String? ?? username,
+    );
   }
 }

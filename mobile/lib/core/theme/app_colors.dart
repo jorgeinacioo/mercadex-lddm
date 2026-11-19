@@ -10,9 +10,9 @@ class AppColors {
   static const Color amber = Color(0xFFFACC15);
   static const Color accent = amber;
   static const Color orange = Color(0xFFFB923C);
-  static const Color background = Color(0xFFF8FAFC);
+  static const Color background = Color(0xFFF1F5F1);
   static const Color cream = background;
-  static const Color surface = Color(0xFFFFFFFF);
+  static const Color surface = Color(0xFFF7F9F7);
   static const Color border = Color(0xFFE2E8F0);
   static const Color cardBorder = border;
   static const Color ink = Color(0xFF0F172A);

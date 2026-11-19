@@ -1,6 +1,6 @@
 class AuthSession {
-  const AuthSession({required this.email, required this.accessToken});
+  const AuthSession({required this.username, required this.accessToken});
 
-  final String email;
+  final String username;
   final String accessToken;
 }

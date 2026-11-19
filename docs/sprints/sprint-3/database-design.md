@@ -63,7 +63,18 @@ CREATE TABLE shopping_list_items (
 );
 ```
 
-A leitura ordena por `created_at ASC, product_id ASC`.
+A leitura ordena por `created_at ASC, product_id ASC`. Essa ordem permanece gravada no SQLite. A ordenação por nome, quando o usuário a escolhe, acontece só na tela.
+
+## Preferência de ordenação
+
+A escolha de como exibir a lista não entra na tabela. Ela fica no SharedPreferences, chave-valor, separada dos produtos.
+
+| Item | Valor |
+| --- | --- |
+| Chave | `shopping_list_sort_order` |
+| Ordem de adição | `created_at` (padrão, também usado se a chave não existir) |
+| Nome do produto | `name_asc` |
+| API | `SharedPreferencesAsync` |
 
 ## Decisões
 
@@ -71,3 +82,14 @@ A leitura ordena por `created_at ASC, product_id ASC`.
 - Não há tabela de usuários. Isolar a lista por conta ficaria para uma entrega posterior.
 - As datas usam texto ISO 8601 em UTC, com largura fixa, para a ordenação lexicográfica coincidir com a ordem cronológica.
 - O PostgreSQL e o Prisma não foram alterados.
+- A ordem de exibição escolhida pelo usuário fica fora do SQLite, em SharedPreferences.
+
+## SQLite e SharedPreferences
+
+| | SQLite | SharedPreferences |
+| --- | --- | --- |
+| Papel | Persistência relacional da lista | Preferência chave-valor de ordenação |
+| O que guarda | Produto, embalagem, quantidade e datas | `shopping_list_sort_order` |
+| Operações | CREATE, READ, UPDATE e DELETE | Ler e gravar um texto |
+| Efeito na lista | Define quais itens existem e suas quantidades | Só muda a ordem em que a tela mostra os itens |
+| Comparação de mercados | Usa os itens e as quantidades gravados | Não entra no cálculo |

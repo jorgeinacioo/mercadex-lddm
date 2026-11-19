@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mercadex/features/home/presentation/providers/home_products_provider.dart';
-import 'package:mercadex/features/products/data/products_repository.dart';
-import 'package:mercadex/features/products/domain/search_product.dart';
+import 'package:mercadex/core/network/api_client.dart';
 import 'package:mercadex/core/widgets/app_search_field.dart';
 import 'package:mercadex/core/widgets/app_top_bar.dart';
-import 'package:mercadex/features/products/presentation/widgets/product_search_card.dart';
+import 'package:mercadex/core/widgets/category_avatar.dart';
+import 'package:mercadex/core/widgets/state_views.dart';
+import 'package:mercadex/features/products/domain/product_summary.dart';
+import 'package:mercadex/features/products/presentation/providers/products_providers.dart';
+import 'package:mercadex/features/products/presentation/widgets/product_cards.dart';
 
+/// Search results, or the whole catalog by category when there is no query.
 class SearchResultsPage extends ConsumerStatefulWidget {
   const SearchResultsPage({super.key, required this.query});
 
@@ -18,118 +21,158 @@ class SearchResultsPage extends ConsumerStatefulWidget {
 }
 
 class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
-  late Future<List<SearchProduct>> _products;
+  String? _category;
 
-  @override
-  void initState() {
-    super.initState();
-    _products = _loadProducts();
-  }
+  String get _query => widget.query.trim();
 
-  @override
-  void didUpdateWidget(covariant SearchResultsPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.query == widget.query) {
-      return;
-    }
-
-    setState(() {
-      _products = _loadProducts();
-    });
-  }
-
-  Future<List<SearchProduct>> _loadProducts() {
-    if (widget.query.trim().isEmpty) {
-      return Future.value([]);
-    }
-
-    return const ProductsRepository().search(widget.query);
+  void _submit(String value) {
+    final query = value.trim();
+    if (query == _query) return;
+    setState(() => _category = null);
+    context.replace(
+      query.isEmpty
+          ? '/search'
+          : '/search?query=${Uri.encodeQueryComponent(query)}',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final results = _query.isEmpty
+        ? ref.watch(productsProvider)
+        : ref.watch(productSearchProvider(_query));
+
     return Scaffold(
-      appBar: const AppTopBar(title: 'Buscar produtos'),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      appBar: AppTopBar(title: _query.isEmpty ? 'Produtos' : 'Buscar produtos'),
+      body: Column(
         children: [
-          AppSearchField(
-            initialValue: widget.query,
-            onSubmitted: (newQuery) {
-              final searchQuery = newQuery.trim();
-              if (searchQuery.isEmpty) {
-                return;
-              }
-
-              context.replace(
-                '/search?query=${Uri.encodeQueryComponent(searchQuery)}',
-              );
-            },
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: AppSearchField(
+              key: ValueKey(_query),
+              initialValue: _query,
+              autofocus: false,
+              onScan: () => context.push('/scan'),
+              onSubmitted: _submit,
+            ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            widget.query.isEmpty
-                ? 'Pesquise um produto'
-                : 'Resultados para "${widget.query}"',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 12),
-          FutureBuilder<List<SearchProduct>>(
-            future: _products,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 24),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              if (snapshot.hasError) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 24),
-                  child: Center(
-                    child: Text('Não foi possível carregar os produtos.'),
-                  ),
-                );
-              }
-
-              final products = snapshot.data ?? [];
-              if (products.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 24),
-                  child: Center(child: Text('Nenhum produto encontrado.')),
-                );
-              }
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    products.length == 1
-                        ? '1 produto encontrado'
-                        : '${products.length} produtos encontrados',
-                  ),
-                  const SizedBox(height: 16),
-                  ...products.map(
-                    (product) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: ProductSearchCard(
-                        name: product.name,
-                        packaging: product.packaging,
-                        onTap: () {
-                          ref
-                              .read(recentProductsProvider.notifier)
-                              .add(product);
-                          context.push('/product/${product.id}');
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+          Expanded(
+            child: results.when(
+              loading: () => const LoadingView(),
+              error: (error, _) => ErrorView(
+                message: friendlyError(error),
+                onRetry: () => _query.isEmpty
+                    ? ref.invalidate(productsProvider)
+                    : ref.invalidate(productSearchProvider(_query)),
+              ),
+              data: (products) => _results(products),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _results(List<ProductSummary> products) {
+    if (products.isEmpty) {
+      return MessageView(
+        icon: Icons.search_off_rounded,
+        title: 'Nenhum produto encontrado',
+        message: 'Tente outro nome, uma marca ou uma categoria, como "café".',
+        actionLabel: 'Ver todos os produtos',
+        onAction: () => _submit(''),
+      );
+    }
+
+    final categories = {
+      for (final product in products) product.category,
+    }.where((category) => category.isNotEmpty).toList()..sort();
+    final visible = _category == null
+        ? products
+        : products.where((product) => product.category == _category).toList();
+    final text = Theme.of(context).textTheme;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+      children: [
+        if (categories.length > 1) ...[
+          SizedBox(
+            height: 40,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _CategoryChip(
+                  label: 'Todos',
+                  selected: _category == null,
+                  onTap: () => setState(() => _category = null),
+                ),
+                for (final category in categories)
+                  _CategoryChip(
+                    label: category,
+                    icon: categoryStyle(category).icon,
+                    selected: _category == category,
+                    onTap: () => setState(() => _category = category),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Text(
+          _query.isEmpty
+              ? '${visible.length} ${visible.length == 1 ? 'produto' : 'produtos'}'
+              : '${visible.length} ${visible.length == 1 ? 'resultado' : 'resultados'} para "$_query"',
+          style: text.bodySmall,
+        ),
+        const SizedBox(height: 10),
+        for (final product in visible)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: ProductTile(
+              product: product,
+              onTap: () => context.push('/product/${product.id}'),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label),
+        avatar: icon == null
+            ? null
+            : Icon(
+                icon,
+                size: 16,
+                color: selected ? scheme.onPrimary : scheme.primary,
+              ),
+        selected: selected,
+        showCheckmark: false,
+        onSelected: (_) => onTap(),
+        selectedColor: scheme.primary,
+        labelStyle: TextStyle(
+          color: selected ? scheme.onPrimary : scheme.onSurface,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
